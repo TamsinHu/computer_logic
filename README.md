@@ -1,1 +1,0 @@
-This is coursework for Computational Logic for Artificial Intelligence module on the Interactive AI PhD programme at the University of Bristol.
