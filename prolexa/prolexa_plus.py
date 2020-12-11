@@ -8,7 +8,9 @@ from pyswip import Prolog
 # import warnings
 # warnings.filterwarnings("ignore")
 
-import prolexa.meta_grammar as meta
+# import prolexa.meta_grammar as meta
+import meta_grammar as meta
+
 
 pl = Prolog()
 

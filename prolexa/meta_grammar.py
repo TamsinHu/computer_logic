@@ -1,4 +1,4 @@
-import contractions
+#import contractions
 import os
 import re
 import string
@@ -124,7 +124,7 @@ def remove_punctuation(s):
 
 def standardised_query(pl, text):
     text = remove_punctuation(text)
-    text = contractions.fix(text)
+    #text = contractions.fix(text)
     text = lemmatise(text)
     return escape_and_call_prolexa(pl, text)
 
