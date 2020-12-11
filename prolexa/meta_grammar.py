@@ -7,8 +7,9 @@ from enum import Enum
 from flair.data import Sentence
 from flair.models import SequenceTagger
 from nltk.stem import WordNetLemmatizer
+PACKAGE_PATH = os.path.dirname(os.path.realpath(__file__))
+PROLOG_PATH = os.path.join(PACKAGE_PATH, 'prolog')
 
-from prolexa import PACKAGE_PATH, PROLOG_PATH
 
 PROLOG_DET_REGEX = r'determiner\([a-z],X=>B,X=>H,\[\(H:-B\)\]\)(.*)'
 PROLOG_DET = 'determiner(p,X=>B,X=>H,[(H:-B)]) --> [{}].\n'

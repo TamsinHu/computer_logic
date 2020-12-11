@@ -153,9 +153,8 @@ random_fact(X):-
 
 
 %%% various stuff for specfic events
-
-% today --> [what,today,is,about].
-% today --> [what,is,today,about].
+today --> [what,today,is,about].
+today --> [what,is,today,about].
 % today --> [what,is,happening,today].
 % 
 % todaysspeaker --> [who,gives,'today\'s',seminar].
