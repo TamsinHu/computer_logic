@@ -9,5 +9,6 @@ prolexa/prolexa.pl
 prolexa/knowledge_store.pl
 prolexa.egg-info
 
-#venv
+#PyCharm Environment files
+.idea/**
 venv/**
