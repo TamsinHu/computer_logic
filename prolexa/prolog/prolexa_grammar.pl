@@ -114,7 +114,7 @@ qword --> [].
 % - what types of animal do you know - || - cats are a kind of animal - || - I don't know any (kinds of animals) ---------
 % - what do you know about cats ------ || - cats are a kind of animal - || - I don't know anything about cats ------------
 % - tell me about cats --------------- || - cats are a kind of animal - || - I don't know anything about cats ------------
-% - tell what you know about cats ---- || - cats are a kind of animal - || - I don't know anything about cats ------------
+% - tell me what you know about cats ---- || - cats are a kind of animal - || - I don't know anything about cats ------------
 % - give me an example of an animal -- || - a cat is a kind of animal - || - I don't know any (kinds of animals) ---------
 % - give me some examples of animals - || - cats are the only kind of animal I know - || - I don't know any (kinds of animals) ---------
 
@@ -136,12 +136,12 @@ qword --> [].
 
 question1(Q) --> [who],verb_phrase(s,_X=>Q).
 question1(Q) --> [is],proper_noun(N,X),property(N,X=>Q).
-question1((Q1,Q2)) --> [what],kinds(X1=>Q1,X2=>Q2,C),noun(s,X=>Q1),[do,you,know].
+%question1((Q1,Q2)) --> [what],kinds(X1=>Q1,X2=>Q2,C),noun(s,X=>Q1),[do,you,know].
 question1(Q)--> [what],verb_phrase(N,_X=>Q).
 %question1((Q1,Q2)) --> verb_phrase(N,X1),kverb_phrase(N,X1,X2),noun(s,X2).
-question1((Q1,Q2)) --> [is,a],noun(s,X1),kverb_phrase(s,X1=>Q1,X2=>Q2),noun(s,Q2).
+%question1((Q1,Q2)) --> [is,a],noun(s,X1),kverb_phrase(s,X1=>Q1,X2=>Q2),noun(s,Q2).
 %question1(Q) --> [give,me],verb_phrase(s,_X=>Q).
-question1(Q) --> [does],proper_noun(_,X),verb_phrase(_,X=>Q).
+%question1(Q) --> [does],proper_noun(_,X),verb_phrase(_,X=>Q).
 %question1((Q1,Q2)) --> [are,some],noun(p,sk=>Q1),
 %					  property(p,sk=>Q2).
 
@@ -181,6 +181,7 @@ command(g(true,"I can do a little bit of logical reasoning. You can talk with me
 %command(g(true,"The presenter is the Centre Director, Professor Peter Flach")) --> todaysspeaker. 
 
 giveme --> [give,me,an,example,of,a].
+giveme --> [give,me,an,example,of,an].
 giveme --> [give].
 
 hypo --> [hyponym,is,an,example,of,a].
