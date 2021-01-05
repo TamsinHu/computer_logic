@@ -17,7 +17,9 @@ prove_question(Query,SessionId,Answer):-
 	( prove_rb(Query,Rulebase) ->
 		transform(Query,Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
+		%write_debug(AnswerAtomList),
 		atomics_to_string(AnswerAtomList," ",Answer)
+
 	; Answer = 'Sorry, I don\'t think this is the case'
 	).	
 
@@ -27,6 +29,7 @@ prove_question(Query,Answer):-
 	( prove_rb(Query,Rulebase) ->
 		transform(Query,Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
+		%write_debug(AnswerAtomList),
 		atomics_to_string(AnswerAtomList," ",Answer)
 	; Answer = ""
 	).	

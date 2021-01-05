@@ -15,6 +15,12 @@ noun(p,M)			--> [Noun_p], {pred2gr(_P,1,n/Noun,M),noun_s2p(Noun,Noun_p)}.
 iverb(s,M)			--> [Verb_s], {pred2gr(_P,1,v/Verb,M),verb_p2s(Verb,Verb_s)}.
 iverb(p,M)			--> [Verb],   {pred2gr(_P,1,v/Verb,M)}.
 
+% hypernyms
+hyper(dog, 1,[canine,canid,domestic_animal,domesticated_animal]).
+
+% hyponyms
+hypo(dog, 1,[puppy,pooch,doggie,doggy,barker,bowwow,cur,mongrel,mutt,lapdog,toy_dog,toy,hunting_dog,working_dog,dalmatian,coach_dog,carriage_dog,basenji,pug,pug-dog,leonberg,newfoundland,newfoundland_dog,great_pyrenees,spitz,griffon,brussels_griffon,belgian_griffon,corgi,welsh_corgi,poodle,poodle_dog,mexican_hairless]).
+
 % unary predicates for adjectives, nouns and verbs
 pred(human,   1,[a/human,n/human]).
 pred(mortal,  1,[a/mortal,n/mortal]).
@@ -28,9 +34,6 @@ pred(bat,     1,[n/bat]).
 pred(penguin, 1,[n/penguin]).
 pred(sparrow, 1,[n/sparrow]).
 pred(fly,     1,[v/fly]).
-
-hypo(dog,  1, [puppy, pooch, doggie, doggy, barker, bow-wow, cur, mongrel, mutt, lapdog, toy dog, toy, hunting dog, working dog, dalmatian, coach dog, carriage dog, basenji, pug, pug-dog, leonberg, newfoundland, newfoundland dog, great pyrenees, spitz, griffon, brussels griffon, belgian griffon, corgi, welsh corgi, poodle, poodle dog, mexican hairless]).
-hyper(dog, 1, [canine, canid, domestic animal, domesticated animal]).
 
 pred2gr(P,1,C/W,X=>Lit):-
 	pred(P,1,L),
@@ -74,7 +77,7 @@ property(p,M) --> noun(p,M).
 determiner(s,X=>B,X=>H,[(H:-B)]) --> [every].
 determiner(p,X=>B,X=>H,[(H:-B)]) --> [all].
 %determiner(p,X=>B,X=>H,[(H:-B)]) --> [].
-determiner(p, sk=>H1, sk=>H2, [(H1:-true),(H2 :- true)]) -->[some].
+%determiner(p, sk=>H1, sk=>H2, [(H1:-true),(H2 :- true)]) -->[some].
 
 proper_noun(s,tweety) --> [tweety].
 proper_noun(s,peter) --> [peter].
@@ -130,7 +133,7 @@ qword --> [].
 question1(Q) --> [who],verb_phrase(s,_X=>Q).
 question1(Q) --> [is],proper_noun(N,X),property(N,X=>Q).
 question1(Q) --> [does],proper_noun(_,X),verb_phrase(_,X=>Q).
-question1((Q1,Q2)) --> [are,some],noun(p,sk=>Q1),property(p,sk=>Q2).
+%question1((Q1,Q2)) --> [are,some],noun(p,sk=>Q1),property(p,sk=>Q2).
 
 % new questions
 %question1((Q1,Q2)) --> [what],kinds(X1=>Q1,X2=>Q2,C),noun(s,X=>Q1),[do,you,know].

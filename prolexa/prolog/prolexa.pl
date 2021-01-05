@@ -38,14 +38,16 @@ prolexa_cli:-
 % Main predicate that uses DCG as defined in prolexa_grammar.pl 
 % to distinguish between sentences, questions and commands
 handle_utterance(SessionId,Utterance,Answer):-
-	write_debug(utterance(Utterance)),
+    % comment/uncomment following line to toggle debugging off/on
+	%write_debug(utterance(Utterance)),
 	% normalise Utterance into list of atoms
 	split_string(Utterance," ","",StringList),	% tokenize by spaces
 	maplist(string_lower,StringList,StringListLow),	% all lowercase
 	maplist(atom_string,UtteranceList,StringListLow),	% strings to atoms
 % A. Utterance is a sentence 
 	( phrase(sentence(Rule),UtteranceList),
-	  write_debug(rule(Rule)),
+	  % comment/uncomment following line to toggle debugging off/on
+	  %write_debug(rule(Rule)),
 	  ( known_rule(Rule,SessionId) -> % A1. It follows from known rules
 			atomic_list_concat(['I already knew that',Utterance],' ',Answer)
 	  ; otherwise -> % A2. It doesn't follow, so add to stored rules
@@ -54,16 +56,19 @@ handle_utterance(SessionId,Utterance,Answer):-
 	  )
 % B. Utterance is a question that can be answered
 	; phrase(question(Query),UtteranceList),
-	  write_debug(query(Query)),
+	  % comment/uncomment following line to toggle debugging off/on
+	  %write_debug(query(Query)),
 	  prove_question(Query,SessionId,Answer) -> true
 % C. Utterance is a command that succeeds
 	; phrase(command(g(Goal,Answer)),UtteranceList),
-	  write_debug(goal(Goal)),
+	  % comment/uncomment following line to toggle debugging off/on
+	  %write_debug(goal(Goal)),
 	  call(Goal) -> true
 % D. None of the above
-	; otherwise -> atomic_list_concat(['I heard you say, ',Utterance,', could you rephrase that please?'],' ',Answer)
-	),
-	write_debug(answer(Answer)).
+	; otherwise -> atomic_list_concat(['I heard you say, "',Utterance,'", could you rephrase that please?'],' ',Answer)
+	).
+	% comment/uncomment following line to toggle debugging off/on
+	%write_debug(answer(Answer)).
 
 write_debug(Atom):-
 	write(user_error,'*** '),writeln(user_error,Atom),flush_output(user_error).
