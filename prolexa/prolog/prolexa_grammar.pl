@@ -7,7 +7,7 @@ utterance(C) --> command(C).
 :- op(600, xfy, '=>').
 
 
-%%% lexicon, driven by predicates %%%
+%%% lexicon, driven by predicates %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 adjective(_,M)		--> [Adj],    {pred2gr(_P,1,a/Adj, M)}.
 noun(s,M)			--> [Noun],   {pred2gr(_P,1,n/Noun,M)}.
@@ -18,16 +18,19 @@ iverb(p,M)			--> [Verb],   {pred2gr(_P,1,v/Verb,M)}.
 % unary predicates for adjectives, nouns and verbs
 pred(human,   1,[a/human,n/human]).
 pred(mortal,  1,[a/mortal,n/mortal]).
-%pred(man,     1,[a/male,n/man]).
-%pred(woman,   1,[a/female,n/woman]).
-%pred(married, 1,[a/married]).
-%pred(bachelor,1,[n/bachelor]).
-%pred(mammal,  1,[n/mammal]).
+pred(man,     1,[a/male,n/man]).
+pred(woman,   1,[a/female,n/woman]).
+pred(married, 1,[a/married]).
+pred(bachelor,1,[n/bachelor]).
+pred(mammal,  1,[n/mammal]).
 pred(bird,    1,[n/bird]).
-%pred(bat,     1,[n/bat]).
+pred(bat,     1,[n/bat]).
 pred(penguin, 1,[n/penguin]).
 pred(sparrow, 1,[n/sparrow]).
 pred(fly,     1,[v/fly]).
+
+hypo(dog,  1, [puppy, pooch, doggie, doggy, barker, bow-wow, cur, mongrel, mutt, lapdog, toy dog, toy, hunting dog, working dog, dalmatian, coach dog, carriage dog, basenji, pug, pug-dog, leonberg, newfoundland, newfoundland dog, great pyrenees, spitz, griffon, brussels griffon, belgian griffon, corgi, welsh corgi, poodle, poodle dog, mexican hairless]).
+hyper(dog, 1, [canine, canid, domestic animal, domesticated animal]).
 
 pred2gr(P,1,C/W,X=>Lit):-
 	pred(P,1,L),
@@ -46,7 +49,7 @@ verb_p2s(Verb_p,Verb_s):-
 	).
 
 
-%%% sentences %%%
+%%% sentences %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 sentence(C) --> sword,sentence1(C).
 
@@ -55,36 +58,15 @@ sword --> [that].
 %noun(s,dog) --> [dog].
 
 % most of this follows Simply Logical, Chapter 7
-%sentence1(C) --> hyponym,verb_phrase(N,M).
-sentence1(C) --> determiner(N,M1,M2,C),noun(N,M1),verb_phrase(N,M2).
-%sentence1(C) --> property(N,M1), kind(N,M2).
-%sentence1(C) --> property(N,M1), kverb_phrase(N,M2).
-%sentence1(C) --> property(s,M1), kind(M1,M2,C), noun(s,M2).
-sentence1(C) --> property(N,M1), verb_phrase(N,M1,M2,C), noun(s,M2).
-sentence1([(L:-true)]) --> proper_noun(N,X),verb_phrase(N,X=>L).
 
-%hyponym --> [hyponym,is].
+% Original Grammar Rules %%%%%%%%%%%%%%%
+sentence1(C) --> determiner(N,M1,M2,C),noun(N,M1),verb_phrase(N,M2).
+sentence1([(L:-true)]) --> proper_noun(N,X),verb_phrase(N,X=>L).
 
 verb_phrase(s,M) --> [is],property(s,M).
 verb_phrase(p,M) --> [are],property(p,M).
 verb_phrase(N,M) --> iverb(N,M).
-verb_phrase(s,M1,M2,C) --> [is],kind(M1,M2,C).
-verb_phrase(p,M1,M2,C) --> [are],kind(M1,M2,C).
-verb_phrase(p,M1,M2,C) --> [are],kinds(M1,M2,C).
-%kverb_phrase(p,M) --> [are],kind(p,M).
-%kverb_phrase(s,M) --> [is],kind(s,M).
-%kverb_phrase(p,M) --> [are],kind(p,M).
-%verb_phrase(s,M) --> [an,example,of],property(s,M).
 
-
-%kind(s,M) --> [is,a,kind,of],noun(s,M).
-%kind(s,M) --> [are kinds of],noun(p,M).
-
-kind(X1=>B,X2=>H,[(H:-B)]) --> [a,kind,of].
-kinds(X1=>B,X2=>H,[(H:-B)]) --> [kinds,of].
-
-%kind(s,M) --> [a,kind,of],noun(s,M).
-%kind(p,M) --> [kinds,of],noun(p,M).
 property(N,M) --> adjective(N,M).
 property(s,M) --> [a],noun(s,M).
 property(p,M) --> noun(p,M).
@@ -92,13 +74,49 @@ property(p,M) --> noun(p,M).
 determiner(s,X=>B,X=>H,[(H:-B)]) --> [every].
 determiner(p,X=>B,X=>H,[(H:-B)]) --> [all].
 %determiner(p,X=>B,X=>H,[(H:-B)]) --> [].
-%determiner(p, sk=>H1, sk=>H2, [(H1:-true),(H2 :- true)]) -->[some].
+determiner(p, sk=>H1, sk=>H2, [(H1:-true),(H2 :- true)]) -->[some].
 
 proper_noun(s,tweety) --> [tweety].
 proper_noun(s,peter) --> [peter].
 
+% New Grammar Rules %%%%%%%%%%%%%%
+%sentence1(C) --> hyponym,verb_phrase(N,M).
+%sentence1(C) --> property(N,M1), kind(N,M2).
+%sentence1(C) --> property(N,M1), kverb_phrase(N,M2).
+%sentence1(C) --> property(s,M1), kind(M1,M2,C), noun(s,M2).
+%sentence1(C) --> property(N,M1), verb_phrase(N,M1,M2,C), noun(s,M2).
 
-%%% questions %%%
+%hyponym --> [hyponym,is].
+
+%verb_phrase(s,M1,M2,C) --> [is],kind(M1,M2,C).
+%verb_phrase(p,M1,M2,C) --> [are],kind(M1,M2,C).
+%verb_phrase(p,M1,M2,C) --> [are],kinds(M1,M2,C).
+%kverb_phrase(p,M) --> [are],kind(p,M).
+%kverb_phrase(s,M) --> [is],kind(s,M).
+%kverb_phrase(p,M) --> [are],kind(p,M).
+%verb_phrase(s,M) --> [an,example,of],property(s,M).
+
+%kind(s,M) --> [is,a,kind,of],noun(s,M).
+%kind(s,M) --> [are kinds of],noun(p,M).
+
+%kind(X1=>B,X2=>H,[(H:-B)]) --> [a,kind,of].
+%kinds(X1=>B,X2=>H,[(H:-B)]) --> [kinds,of].
+
+%kind(s,M) --> [a,kind,of],noun(s,M).
+%kind(p,M) --> [kinds,of],noun(p,M).
+
+% statement --------------------------- || positive answer (s) ------------------------------ || negative answer --
+% - cats are animals ------------------ || - I will remember that a cat is a kind of animal - || - I already know....
+% - cats are a kind of animal --------- || - I will remember that a cat is a kind of animal - || - ----------------
+% - cats are kinds of animal ---------- || - I will remember that a cat is a kind of animal - || - ----------------
+% - cats are an example of an animal -- || - I will remember that a cat is a kind of animal - || - ----------------
+% - a cat is an animal ---------------- || - I will remember that a cat is a kind of animal - || - ----------------
+% - a cat is a kind of animal --------- || - I will remember that a cat is a kind of animal - || - ----------------
+% - a cat is an example of an animal -- || - I will remember that a cat is a kind of animal - || - ----------------
+
+% CURRENTLY ONLY CONSIDERING DIRECT HYPER/HYPONYMS COULD WE CONSIDER FULL CHAINS?
+
+%%% questions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 question(Q) --> qword,question1(Q).
 
@@ -106,11 +124,28 @@ qword --> [].
 %qword --> [if]. 
 %qword --> [whether].
 
+% (plural answers in the form of comma separated lists with an 'and' before the last element)
+
+% original questions
+question1(Q) --> [who],verb_phrase(s,_X=>Q).
+question1(Q) --> [is],proper_noun(N,X),property(N,X=>Q).
+question1(Q) --> [does],proper_noun(_,X),verb_phrase(_,X=>Q).
+question1((Q1,Q2)) --> [are,some],noun(p,sk=>Q1),property(p,sk=>Q2).
+
+% new questions
+%question1((Q1,Q2)) --> [what],kinds(X1=>Q1,X2=>Q2,C),noun(s,X=>Q1),[do,you,know].
+%question1((Q1,Q2)) --> verb_phrase(N,X1),kverb_phrase(N,X1,X2),noun(s,X2).
+%question1((Q1,Q2)) --> [is,a],noun(s,X1),kverb_phrase(s,X1=>Q1,X2=>Q2),noun(s,Q2).
+%question1(Q) --> [give,me],verb_phrase(s,_X=>Q).
+%question1(Q)--> [what],verb_phrase(N,_X=>Q).
+
+
 % question --------------------------- || positive answer (s) --------- || negative answer -------------------------------
 % - what is a cat -------------------- || - a cat is a kind of animal - || - I don't know (what a cat is) ----------------
 % - what are cats
 % - is a cat a kind of animal -------- || - a cat is a kind of animal - || - I don't know (if a cat is a kind of animal) -
 % - are cats a kind of animal
+% - are cats kinds of animal
 % - what types of animal do you know - || - cats are a kind of animal - || - I don't know any (kinds of animals) ---------
 % - what do you know about cats ------ || - cats are a kind of animal - || - I don't know anything about cats ------------
 % - tell me about cats --------------- || - cats are a kind of animal - || - I don't know anything about cats ------------
@@ -132,21 +167,7 @@ qword --> [].
 % - do you know what kind of animal a poodle is
 
 
-% (plural answers in the form of comma separated lists with an 'and' before the last element)
-
-question1(Q) --> [who],verb_phrase(s,_X=>Q).
-question1(Q) --> [is],proper_noun(N,X),property(N,X=>Q).
-%question1((Q1,Q2)) --> [what],kinds(X1=>Q1,X2=>Q2,C),noun(s,X=>Q1),[do,you,know].
-question1(Q)--> [what],verb_phrase(N,_X=>Q).
-%question1((Q1,Q2)) --> verb_phrase(N,X1),kverb_phrase(N,X1,X2),noun(s,X2).
-%question1((Q1,Q2)) --> [is,a],noun(s,X1),kverb_phrase(s,X1=>Q1,X2=>Q2),noun(s,Q2).
-%question1(Q) --> [give,me],verb_phrase(s,_X=>Q).
-%question1(Q) --> [does],proper_noun(_,X),verb_phrase(_,X=>Q).
-%question1((Q1,Q2)) --> [are,some],noun(p,sk=>Q1),
-%					  property(p,sk=>Q2).
-
-
-%%% commands %%%
+%%% commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % These DCG rules have the form command(g(Goal,Answer)) --> <sentence>
 % The idea is that if :-phrase(command(g(Goal,Answer)),UtteranceList). succeeds,
@@ -156,6 +177,8 @@ question1(Q)--> [what],verb_phrase(N,_X=>Q).
 %	command(g(random_fact(Fact),Fact)) --> [tell,me,anything].
 % means that "tell me anything" will trigger the goal random_fact(Fact), 
 % which will generate a random fact as output for prolexa.
+
+% Original Commands %%%
 
 command(g(retractall(prolexa:stored_rule(_,C)),"I erased it from my memory")) --> forget,sentence(C). 
 command(g(retractall(prolexa:stored_rule(_,_)),"I am a blank slate")) --> forgetall. 
@@ -167,18 +190,24 @@ command(g(random_fact(Fact),Fact)) --> getanewfact.
 %command(g(iai(A),A)) --> what. 
 command(g(rr(A),A)) --> thanks.
 
+% The special form
+%	command(g(true,<response>)) --> <sentence>.
+% maps specific input sentences to specific responses.
+
+command(g(true,"I can do a little bit of logical reasoning. You can talk with me about humans and birds.")) --> [what,can,you,do,for,me,minerva].
+%command(g(true,"Your middle name is Adriaan")) --> [what,is,my,middle,name].
+%command(g(true,"Today you can find out about postgraduate study at the University of Bristol. This presentation is about the Centre for Doctoral Training in Interactive Artificial Intelligence")) --> today.
+%command(g(true,"The presenter is the Centre Director, Professor Peter Flach")) --> todaysspeaker.
+
+
+% New Commands %%%
+
 %command(g(example(X,Answer),Answer)) --> giveme,[X].
 command(g(example(X,Answer),Answer)) --> giveme,noun(s, X).
 command(g(kinds(X,Answer),Answer)) --> [what,kinds,of],noun(s, X),[do,you,know].
 
-% The special form
-%	command(g(true,<response>)) --> <sentence>. 
-% maps specific input sentences to specific responses.
 
-command(g(true,"I can do a little bit of logical reasoning. You can talk with me about humans and birds.")) --> [what,can,you,do,for,me,minerva]. 
-%command(g(true,"Your middle name is Adriaan")) --> [what,is,my,middle,name]. 
-%command(g(true,"Today you can find out about postgraduate study at the University of Bristol. This presentation is about the Centre for Doctoral Training in Interactive Artificial Intelligence")) --> today. 
-%command(g(true,"The presenter is the Centre Director, Professor Peter Flach")) --> todaysspeaker. 
+% phrase shortenings %%%
 
 giveme --> [give,me,an,example,of,a].
 giveme --> [give,me,an,example,of,an].
@@ -214,6 +243,19 @@ tellmeabout --> [tell,me,about].
 tellmeabout --> [who,is].
 tellmeabout --> [tell,me],all,[about].
 
+
+%%%% predicates %%%%%%%%%%%%%%
+
+% Original Predicates %%%
+
+rr(A):-random_member(A,["no worries","the pleasure is entirely mine","any time, peter","happy to be of help"]).
+
+random_fact(X):-
+	random_member(X,["walruses can weigh up to 1900 kilograms", "There are two species of walrus - Pacific and Atlantic", "Walruses eat molluscs", "Walruses live in herds","Walruses have two large tusks"]).
+
+
+% New Predicates %%%
+
 example(N,A):-
 %pred2gr(_P,1,n/Noun,PN),
 %noun(s,N),
@@ -223,12 +265,6 @@ append([hyponym,is,an,example,of,a],L,X),
 %(N:-X).
 %atomics_to_string([hyponym,is,an,example,of,Z]," " ,A).
 atomics_to_string(X," ",A).
-
-
-rr(A):-random_member(A,["no worries","the pleasure is entirely mine","any time, peter","happy to be of help"]).
-
-random_fact(X):-
-	random_member(X,["walruses can weigh up to 1900 kilograms", "There are two species of walrus - Pacific and Atlantic", "Walruses eat molluscs", "Walruses live in herds","Walruses have two large tusks"]).
 
 
 %%% various stuff for specfic events

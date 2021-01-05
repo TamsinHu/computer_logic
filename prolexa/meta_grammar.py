@@ -152,6 +152,7 @@ def get_tags(tagger, text):
     return tags
 
 def handle_noun(lines, i, text, tags):
+    print(lines)
     nn = POS.NOUN.value
     start = 'pred('
     end = ', '
@@ -161,17 +162,35 @@ def handle_noun(lines, i, text, tags):
     _, input_word = is_plural(input_word)
     text[tags.index(nn)] = input_word
 
+    ### CALL FUNCTION TO GET HYPERNYMS OF INPUT_WORD AS A LIST OF STRINGS
+
+    ### CALL FUNCTION TO GET HYPONYMS OF INPUT_WORD AS A LIST OF STRINGS
+
+    ### FUNCTION TO ADD ALL HYPERNYMS AND HYPONYMS AS PREDICATES
+
+    # for all the lines after the fist predicate definition
     for noun_idx, noun_line in enumerate(lines[i:]):
+        print(noun_idx, noun_line)
+
+        # if noun_line is a line past where the predicates are stored in the knowledge base
+        # then remove the current word and corresponding tag from the input list
         if not(re.match(r'pred\((.*)[1],\[(.*)\]\)\.', noun_line)):
+
+            # CHECK WHY WE ARE INCREMENTING IDX !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             noun_idx = noun_idx + i
+
             if tags:
                 tags.remove(nn)
             if text:
                 text.remove(input_word)
             break
 
+        # get the part of the knowledge base predicate after 'pred(' and before ', ').
         line_word = (noun_line.split(start))[1].split(end)[0]
+
+        # if it matches the input word
         if input_word == line_word:
+            # delete it from the list of input words
             if (re.match(r'pred\((.*)[1](.*)n\/(.*)\]\)\.', noun_line)):
                 exists = True
                 if tags:
@@ -179,6 +198,7 @@ def handle_noun(lines, i, text, tags):
                 if text:
                     text.remove(input_word)
                 break
+            # if it exists but not as a noun, add it as a noun and then delete if from list of input words
             else:
                 noun_idx = noun_idx + i
                 insert_idx = noun_line.index(']).')
@@ -194,6 +214,7 @@ def handle_noun(lines, i, text, tags):
                     text.remove(input_word)
                 break
 
+    # if it is not in the knowledge base at all, add it
     if not exists:
         if new_line == '':
             new_line = 'pred(' + input_word + ', 1,[n/' + input_word + ']).\n'
@@ -331,20 +352,35 @@ def handle_proper_noun(lines, i, text, tags):
     return lines
 
 def update_rules(tagger, text):
+
+    # Get PoS tags for each word in input text
     tags = get_tags(tagger, text)
     text = text.lower()
     # Handle extra whitespace
     text = ' '.join(text.split()).split(' ')
     start = ''
     end = ''
+
+    # Extract all the knowledge from the knowledge store
     lines = get_prolog_grammar(PACKAGE_PATH, 'knowledge_store.pl')
 
+    # Go through the knowledge line by line
     for idx, line in enumerate(iter(lines)):
         if not text:
             break
 
+        # Check to find the place in knowledge store where other predicates are saved
         pred_match = r'pred\((.*)[1],\[(.*)\]\)\.'
+        # hyper_match = r'hyper\((.*)[1],\[(.*)\]\)\.'
+        # hypo_match = r'hypo\((.*)[1],\[(.*)\]\)\.'
 
+        # DO THIS SEPERATELY FOR PREDS / HYPOS / HYPERS?
+        # if (POS.NOUN.value in tags) and re.match(hypo_match, line):
+        #     lines = handle_noun(lines, idx, text, tags)
+
+        #print(text, tags)
+
+        # Handle Nouns, Adjectives and Verbs as predicates
         if (POS.NOUN.value in tags) and re.match(pred_match, line):
             lines = handle_noun(lines, idx, text, tags)
 
@@ -354,9 +390,11 @@ def update_rules(tagger, text):
         if (POS.VERB.value in tags) and re.match(pred_match, line):
             lines = handle_verb(lines, idx, text, tags)
 
+        # Handle Proper Nouns as rules
         prop_match = r'proper_noun\(s(.*) -->(.*)\]\.'
 
         if (POS.PROPNOUN.value in tags) and re.match(prop_match, line):
             lines = handle_proper_noun(lines, idx, text, tags)
 
+    # Write a new knowledge base incorporating input
     write_new_grammar(PACKAGE_PATH, lines)
