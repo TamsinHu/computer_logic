@@ -18,15 +18,23 @@ class ProlexaPlus(Cmd):
     file = None
 
     def default(self, input_):
+
+        # Quit program using the follwing words:
         stopwords = ["halt","quit","exit","stop"]
         if input_ in stopwords:
             return True
-        first_answer = meta.standardised_query(pl, input_)[0]['Output']
+
+        # Get prolexa's top answer
+        first_answer = str(meta.standardised_query(pl, input_)[0]['Output'])
+
+        # remove weird b character from beginning of answers to questions
+        if first_answer.startswith("b'"):
+            first_answer = first_answer.lstrip('b')
+            first_answer = first_answer.strip("'")
         print(first_answer)
 
-    # def do_exit(self,line):
-    #     """Close the gtk main loop, and return True to exit cmd."""
-    #     return True
+        ### add emojis as prompts?
+
 
 def prolexa_plus_repl():
     meta.reset_grammar()

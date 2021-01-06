@@ -2,6 +2,7 @@ import contractions
 import os
 import re
 import string
+from copy import deepcopy
 
 from enum import Enum
 from flair.data import Sentence
@@ -9,6 +10,8 @@ from flair.models import SequenceTagger
 from nltk.stem import WordNetLemmatizer
 
 from prolexa import PACKAGE_PATH, PROLOG_PATH
+
+import wordnet_functions as wnf
 
 PROLOG_DET_REGEX = r'determiner\([a-z],X=>B,X=>H,\[\(H:-B\)\]\)(.*)'
 PROLOG_DET = 'determiner(p,X=>B,X=>H,[(H:-B)]) --> [{}].\n'
@@ -93,10 +96,15 @@ def write_new_prolexa(path, lines):
         f.write(l)
 
 def escape_and_call_prolexa(pl, text):
+
+    # Update the knowledge base
     update_rules(tagger, text)
     #update_knowledge_store(pl)
+
+    # Start Prolexa
     initialise_prolexa(pl)
 
+    # Ask the question / run the command etc.
     libPrefix = 'prolexa:'
     generator = pl.query(libPrefix + handle_utterance_str(text))
     return list(generator)
@@ -151,8 +159,110 @@ def get_tags(tagger, text):
     tags = standardise_tags(tags)
     return tags
 
+
+def handle_hyper(lines, i, hyper_text, hyper_tags):
+    nn = POS.NOUN.value
+    start = 'hyper('
+    end = ', '
+    exists = False
+    new_line = ''
+    input_word = hyper_text[hyper_tags.index(nn)]
+    _, input_word = is_plural(input_word)
+    hyper_text[hyper_tags.index(nn)] = input_word
+
+    ### CALL FUNCTION TO GET HYPERNYMS OF INPUT_WORD AS A LIST OF STRINGS
+    hypernyms = wnf.get_hypernym(input_word)
+    ### CALL FUNCTION TO GET HYPONYMS OF INPUT_WORD AS A LIST OF STRINGS
+
+    ### FUNCTION TO ADD ALL HYPERNYMS AND HYPONYMS AS PREDICATES
+
+    # for all the lines after the fist predicate definition
+    for noun_idx, noun_line in enumerate(lines[i:]):
+
+        # if noun_line is a line past where the predicates are stored in the knowledge base
+        # then remove the current word and corresponding tag from the input list
+        if not(re.match(r'hyper\((.*)[1],\[(.*)\]\)\.', noun_line)):
+            noun_idx = noun_idx + i
+            if hyper_tags:
+                hyper_tags.remove(nn)
+            if hyper_text:
+                hyper_text.remove(input_word)
+            break
+
+        # get the part of the knowledge base predicate after 'pred(' and before ', ').
+        line_word = (noun_line.split(start))[1].split(end)[0]
+
+        ### ADD A CASE FOR EDITING EXISTING ENTRIES
+
+        # if it matches the input word
+        if input_word == line_word:
+            # delete it from the list of input words
+            exists = True
+            if hyper_tags:
+                hyper_tags.remove(nn)
+            if hyper_text:
+                hyper_text.remove(input_word)
+            break
+
+    # if it is not in the knowledge base at all, add it
+    if not exists:
+        if new_line == '':
+            new_line = 'hyper(' + input_word + ', 1,' + hypernyms + ').\n'
+        lines.insert(noun_idx, new_line)
+
+    return lines
+
+
+def handle_hypo(lines, i, hypo_text, hypo_tags):
+    nn = POS.NOUN.value
+    start = 'hypo('
+    end = ', '
+    exists = False
+    new_line = ''
+    input_word = hypo_text[hypo_tags.index(nn)]
+    _, input_word = is_plural(input_word)
+    hypo_text[hypo_tags.index(nn)] = input_word
+
+    hyponyms = wnf.get_hyponym(input_word)
+
+    # for all the lines after the fist predicate definition
+    for noun_idx, noun_line in enumerate(lines[i:]):
+
+        # if noun_line is a line past where the predicates are stored in the knowledge base
+        # then remove the current word and corresponding tag from the input list
+        if not(re.match(r'hypo\((.*)[1],\[(.*)\]\)\.', noun_line)):
+            noun_idx = noun_idx + i
+            if hypo_tags:
+                hypo_tags.remove(nn)
+            if hypo_text:
+                hypo_text.remove(input_word)
+            break
+
+        # get the part of the knowledge base predicate after 'pred(' and before ', ').
+        line_word = (noun_line.split(start))[1].split(end)[0]
+
+        ### ADD A CASE FOR EDITING EXISTING ENTRIES
+
+        # if it matches the input word
+        if input_word == line_word:
+            # delete it from the list of input words
+            exists = True
+            if hypo_tags:
+                hypo_tags.remove(nn)
+            if hypo_text:
+                hypo_text.remove(input_word)
+            break
+
+    # if it is not in the knowledge base at all, add it
+    if not exists:
+        if new_line == '':
+            new_line = 'hypo(' + input_word + ', 1,' + hyponyms + ').\n'
+        lines.insert(noun_idx, new_line)
+
+    return lines
+
+
 def handle_noun(lines, i, text, tags):
-    print(lines)
     nn = POS.NOUN.value
     start = 'pred('
     end = ', '
@@ -162,21 +272,12 @@ def handle_noun(lines, i, text, tags):
     _, input_word = is_plural(input_word)
     text[tags.index(nn)] = input_word
 
-    ### CALL FUNCTION TO GET HYPERNYMS OF INPUT_WORD AS A LIST OF STRINGS
-
-    ### CALL FUNCTION TO GET HYPONYMS OF INPUT_WORD AS A LIST OF STRINGS
-
-    ### FUNCTION TO ADD ALL HYPERNYMS AND HYPONYMS AS PREDICATES
-
     # for all the lines after the fist predicate definition
     for noun_idx, noun_line in enumerate(lines[i:]):
-        print(noun_idx, noun_line)
 
         # if noun_line is a line past where the predicates are stored in the knowledge base
         # then remove the current word and corresponding tag from the input list
         if not(re.match(r'pred\((.*)[1],\[(.*)\]\)\.', noun_line)):
-
-            # CHECK WHY WE ARE INCREMENTING IDX !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             noun_idx = noun_idx + i
 
             if tags:
@@ -360,6 +461,10 @@ def update_rules(tagger, text):
     text = ' '.join(text.split()).split(' ')
     start = ''
     end = ''
+    hyper_tags = deepcopy(tags)
+    hypo_tags = deepcopy(tags)
+    hyper_text = deepcopy(text)
+    hypo_text = deepcopy(text)
 
     # Extract all the knowledge from the knowledge store
     lines = get_prolog_grammar(PACKAGE_PATH, 'knowledge_store.pl')
@@ -369,16 +474,20 @@ def update_rules(tagger, text):
         if not text:
             break
 
+        # RECORD HYPERNYMS
+        hyper_match = r'hyper\((.*)[1],\[(.*)\]\)\.'
+
+        if (POS.NOUN.value in hyper_tags) and re.match(hyper_match, line):
+            lines = handle_hyper(lines, idx, hyper_text, hyper_tags)
+
+        # RECORD HYPONYMS
+        hypo_match = r'hypo\((.*)[1],\[(.*)\]\)\.'
+        if (POS.NOUN.value in hypo_tags) and re.match(hypo_match, line):
+            lines = handle_hypo(lines, idx, hypo_text, hypo_tags)
+
         # Check to find the place in knowledge store where other predicates are saved
         pred_match = r'pred\((.*)[1],\[(.*)\]\)\.'
-        # hyper_match = r'hyper\((.*)[1],\[(.*)\]\)\.'
-        # hypo_match = r'hypo\((.*)[1],\[(.*)\]\)\.'
 
-        # DO THIS SEPERATELY FOR PREDS / HYPOS / HYPERS?
-        # if (POS.NOUN.value in tags) and re.match(hypo_match, line):
-        #     lines = handle_noun(lines, idx, text, tags)
-
-        #print(text, tags)
 
         # Handle Nouns, Adjectives and Verbs as predicates
         if (POS.NOUN.value in tags) and re.match(pred_match, line):
