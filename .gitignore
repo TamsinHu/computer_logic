@@ -12,3 +12,7 @@ prolexa.egg-info
 #PyCharm Environment files
 .idea/**
 venv/**
+
+#VSCode Environment files
+.vscode/**
+.venv/**

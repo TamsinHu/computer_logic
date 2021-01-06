@@ -1,27 +1,29 @@
-#! /usr/bin/env python
-
-import os
+import meta_grammar as meta
 from cmd import Cmd
 from pyswip import Prolog
-
-# import warnings
-# warnings.filterwarnings("ignore")
-
-# import prolexa.meta_grammar as meta
-import meta_grammar as meta
+from datetime import datetime
+from shutil import copy2
 
 pl = Prolog()
+
+from prolexa import PACKAGE_PATH, PROLOG_PATH
+
 
 class ProlexaPlus(Cmd):
     intro = 'Hello! I\'m ProlexaPlus! Tell me anything, ask me anything.'
     prompt = '> '
     file = None
 
+    def preloop(self):
+        input('Would you like me to remember previous knowledge?')
+
     def default(self, input_):
 
         # Quit program using the follwing words:
         stopwords = ["halt","quit","exit","stop"]
         if input_ in stopwords:
+            time = datetime.now().strftime("%d%H%M%S")
+            copy2('knowledge_store.pl', f'history/knowledge_store_{time}.pl')
             return True
 
         # Get prolexa's top answer
@@ -33,8 +35,8 @@ class ProlexaPlus(Cmd):
             first_answer = first_answer.strip("'")
         print(first_answer)
 
-        ### add emojis as prompts?
-
+    def postloop(self):
+        print('Bye! Talk to you soon!')
 
 def prolexa_plus_repl():
     meta.reset_grammar()
