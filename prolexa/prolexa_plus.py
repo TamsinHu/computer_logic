@@ -6,21 +6,25 @@ from shutil import copy2
 
 pl = Prolog()
 
-from prolexa import PACKAGE_PATH, PROLOG_PATH
-
-
 class ProlexaPlus(Cmd):
-    intro = 'Hello! I\'m ProlexaPlus! Tell me anything, ask me anything.'
-    prompt = '> '
+    intro = '🤖: Hello! I\'m Hyprolexa! Did you know that a dog is a kind of domesticated animal? 🐕 Anyway...'
+    prompt = '🧠: '
     file = None
 
     def preloop(self):
-        input('Would you like me to remember previous knowledge?')
+        ks = input('\n🤖: Before we begin, would you like to jog my memory? Give me the name of an existing knowledge store...\n🧠: ')
+        try:
+            copy2(f'history/{ks}.pl', 'knowledge_store.pl')
+            print('🤖: Oh yes, I remember now!\n')
+
+            # Maybe say 'we spoke about cows and honey'
+        except:
+            print("🤖: That doesn't remind me of anything.\n")
 
     def default(self, input_):
 
         # Quit program using the follwing words:
-        stopwords = ["halt","quit","exit","stop"]
+        stopwords = ["bye","halt","quit","exit","stop"]
         if input_ in stopwords:
             time = datetime.now().strftime("%d%H%M%S")
             copy2('knowledge_store.pl', f'history/knowledge_store_{time}.pl')
@@ -33,10 +37,13 @@ class ProlexaPlus(Cmd):
         if first_answer.startswith("b'"):
             first_answer = first_answer.lstrip('b')
             first_answer = first_answer.strip("'")
-        print(first_answer)
 
+        # print answer
+        print('🤖: ' + first_answer)
+
+    # Type a message on quitting
     def postloop(self):
-        print('Bye! Talk to you soon!')
+        print('🤖: Bye! Talk to you soon!')
 
 def prolexa_plus_repl():
     meta.reset_grammar()

@@ -172,11 +172,9 @@ def handle_hyper(lines, i, hyper_text, hyper_tags):
     _, input_word = is_plural(input_word)
     hyper_text[hyper_tags.index(nn)] = input_word
 
-    ### CALL FUNCTION TO GET HYPERNYMS OF INPUT_WORD AS A LIST OF STRINGS
+    # Get a string of hypernyms
     hypernyms = wnf.get_hypernym(input_word)
-    ### CALL FUNCTION TO GET HYPONYMS OF INPUT_WORD AS A LIST OF STRINGS
 
-    ### FUNCTION TO ADD ALL HYPERNYMS AND HYPONYMS AS PREDICATES
 
     # for all the lines after the fist predicate definition
     for noun_idx, noun_line in enumerate(lines[i:]):
@@ -208,9 +206,11 @@ def handle_hyper(lines, i, hyper_text, hyper_tags):
 
     # if it is not in the knowledge base at all, add it
     if not exists:
-        if new_line == '':
+        if hypernyms == '[]':
+            pass
+        elif new_line == '':
             new_line = 'hyper(' + input_word + ', 1,' + hypernyms + ').\n'
-        lines.insert(noun_idx, new_line)
+            lines.insert(noun_idx, new_line)
 
     return lines
 
@@ -257,9 +257,11 @@ def handle_hypo(lines, i, hypo_text, hypo_tags):
 
     # if it is not in the knowledge base at all, add it
     if not exists:
-        if new_line == '':
+        if hyponyms == '[]':
+            pass
+        elif new_line == '':
             new_line = 'hypo(' + input_word + ', 1,' + hyponyms + ').\n'
-        lines.insert(noun_idx, new_line)
+            lines.insert(noun_idx, new_line)
 
     return lines
 
