@@ -13,6 +13,8 @@ prolexa.egg-info
 .idea/**
 venv/**
 
-#VSCode environment files
-.venv/
-.vscode/
+#VSCode Environment files
+.vscode/**
+.venv/**
+
+

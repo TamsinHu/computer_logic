@@ -4,7 +4,10 @@ from nltk.corpus import wordnet
 
 def get_hypernym(noun):
     #returns list of strings, hypernyms for that noun
-    syns = wordnet.synsets(noun, pos='n')[0] # pos=only nouns
+    try:
+        syns = wordnet.synsets(noun, pos='n')[0] # pos=only nouns
+    except:
+        return '[]'
     hypernyms = syns.hypernyms()
     lemmas = []
     for nym in hypernyms:
@@ -17,7 +20,10 @@ def get_hypernym(noun):
 
 def get_hyponym(noun):
     #returns list of strings, hyponyms for that noun
-    syns = wordnet.synsets(noun, pos='n')[0] # pos=only nouns
+    try:
+        syns = wordnet.synsets(noun, pos='n')[0]  # pos=only nouns
+    except:
+        return '[]'
     hyponyms = syns.hyponyms()
     lemmas = []
     for nym in hyponyms:
