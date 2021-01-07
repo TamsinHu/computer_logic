@@ -3,6 +3,7 @@ from cmd import Cmd
 from pyswip import Prolog
 from datetime import datetime
 from shutil import copy2
+import re
 
 pl = Prolog()
 
@@ -37,6 +38,9 @@ class ProlexaPlus(Cmd):
         if first_answer.startswith("b'"):
             first_answer = first_answer.lstrip('b')
             first_answer = first_answer.strip("'")
+
+        # change a to an when next to vowels
+        first_answer = re.sub(r'(^a| a)( [aeiou])', r'\1n\2', first_answer)
 
         # print answer
         print('🤖: ' + first_answer)

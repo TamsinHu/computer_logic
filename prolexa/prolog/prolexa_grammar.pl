@@ -15,6 +15,9 @@ noun(p,M)			--> [Noun_p], {pred2gr(_P,1,n/Noun,M),noun_s2p(Noun,Noun_p)}.
 iverb(s,M)			--> [Verb_s], {pred2gr(_P,1,v/Verb,M),verb_p2s(Verb,Verb_s)}.
 iverb(p,M)			--> [Verb],   {pred2gr(_P,1,v/Verb,M)}.
 
+hypernym(s,M)          --> [Noun],   {hyper2gr(_P,1,Noun,M)}.
+hyponym(s,M)           --> [Noun],   {hypo2gr(_P,1,Noun,M)}.
+
 % hypernyms
 hyper(dog, 1,[canine,canid,domestic_animal,domesticated_animal]).
 
@@ -22,6 +25,7 @@ hyper(dog, 1,[canine,canid,domestic_animal,domesticated_animal]).
 hypo(dog, 1,[puppy,pooch,doggie,doggy,barker,bowwow,cur,mongrel,mutt,lapdog,toy_dog,toy,hunting_dog,working_dog,dalmatian,coach_dog,carriage_dog,basenji,pug,pug-dog,leonberg,newfoundland,newfoundland_dog,great_pyrenees,spitz,griffon,brussels_griffon,belgian_griffon,corgi,welsh_corgi,poodle,poodle_dog,mexican_hairless]).
 
 % unary predicates for adjectives, nouns and verbs
+pred(dog,     1,[n/dog]).
 pred(human,   1,[a/human,n/human]).
 pred(mortal,  1,[a/mortal,n/mortal]).
 pred(man,     1,[a/male,n/man]).
@@ -35,9 +39,20 @@ pred(penguin, 1,[n/penguin]).
 pred(sparrow, 1,[n/sparrow]).
 pred(fly,     1,[v/fly]).
 
+
 pred2gr(P,1,C/W,X=>Lit):-
 	pred(P,1,L),
 	member(C/W,L),
+	Lit=..[P,X].
+
+hyper2gr(P,1,W,X=>Lit):-
+	hyper(P,1,L),
+	member(W,L),
+	Lit=..[P,X].
+
+hypo2gr(P,1,W,X=>Lit):-
+	hypo(P,1,L),
+	member(W,L),
 	Lit=..[P,X].
 
 noun_s2p(Noun_s,Noun_p):-
@@ -52,61 +67,52 @@ verb_p2s(Verb_p,Verb_s):-
 	).
 
 
+
 %%% sentences %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 sentence(C) --> sword,sentence1(C).
 
 sword --> [].
 sword --> [that].
-%noun(s,dog) --> [dog].
+
 
 % most of this follows Simply Logical, Chapter 7
 
 % Original Grammar Rules %%%%%%%%%%%%%%%
 sentence1(C) --> determiner(N,M1,M2,C),noun(N,M1),verb_phrase(N,M2).
 sentence1([(L:-true)]) --> proper_noun(N,X),verb_phrase(N,X=>L).
+% new
+sentence1([(L:-true)]) --> a,noun(s,X),[is],a,kind,hypernym(s,X=>L).
+sentence1([(L:-true)]) --> a,noun(s,X=>L),[is],a,example,hypernym(s,X).
+sentence1([(L:-true)]) --> a,hyponym(s,X),[is],a,kind,noun(s,X=>L).
+
 
 verb_phrase(s,M) --> [is],property(s,M).
 verb_phrase(p,M) --> [are],property(p,M).
 verb_phrase(N,M) --> iverb(N,M).
 
+
+% original
 property(N,M) --> adjective(N,M).
 property(s,M) --> [a],noun(s,M).
 property(p,M) --> noun(p,M).
+%new
 
+
+% original
 determiner(s,X=>B,X=>H,[(H:-B)]) --> [every].
 determiner(p,X=>B,X=>H,[(H:-B)]) --> [all].
 %determiner(p,X=>B,X=>H,[(H:-B)]) --> [].
-%determiner(p, sk=>H1, sk=>H2, [(H1:-true),(H2 :- true)]) -->[some].
+%determiner(p,sk=>H1,sk=>H2,[(H1:-true),(H2:-true)]) --> [some].
+%new
 
+% original
 proper_noun(s,tweety) --> [tweety].
 proper_noun(s,peter) --> [peter].
+% new
 
-% New Grammar Rules %%%%%%%%%%%%%%
-%sentence1(C) --> hyponym,verb_phrase(N,M).
-%sentence1(C) --> property(N,M1), kind(N,M2).
-%sentence1(C) --> property(N,M1), kverb_phrase(N,M2).
-%sentence1(C) --> property(s,M1), kind(M1,M2,C), noun(s,M2).
-%sentence1(C) --> property(N,M1), verb_phrase(N,M1,M2,C), noun(s,M2).
 
-%hyponym --> [hyponym,is].
 
-%verb_phrase(s,M1,M2,C) --> [is],kind(M1,M2,C).
-%verb_phrase(p,M1,M2,C) --> [are],kind(M1,M2,C).
-%verb_phrase(p,M1,M2,C) --> [are],kinds(M1,M2,C).
-%kverb_phrase(p,M) --> [are],kind(p,M).
-%kverb_phrase(s,M) --> [is],kind(s,M).
-%kverb_phrase(p,M) --> [are],kind(p,M).
-%verb_phrase(s,M) --> [an,example,of],property(s,M).
-
-%kind(s,M) --> [is,a,kind,of],noun(s,M).
-%kind(s,M) --> [are kinds of],noun(p,M).
-
-%kind(X1=>B,X2=>H,[(H:-B)]) --> [a,kind,of].
-%kinds(X1=>B,X2=>H,[(H:-B)]) --> [kinds,of].
-
-%kind(s,M) --> [a,kind,of],noun(s,M).
-%kind(p,M) --> [kinds,of],noun(p,M).
 
 % statement --------------------------- || positive answer (s) ------------------------------ || negative answer --
 % - cats are animals ------------------ || - I will remember that a cat is a kind of animal - || - I already know....
@@ -136,11 +142,11 @@ question1(Q) --> [does],proper_noun(_,X),verb_phrase(_,X=>Q).
 %question1((Q1,Q2)) --> [are,some],noun(p,sk=>Q1),property(p,sk=>Q2).
 
 % new questions
-%question1((Q1,Q2)) --> [what],kinds(X1=>Q1,X2=>Q2,C),noun(s,X=>Q1),[do,you,know].
-%question1((Q1,Q2)) --> verb_phrase(N,X1),kverb_phrase(N,X1,X2),noun(s,X2).
-%question1((Q1,Q2)) --> [is,a],noun(s,X1),kverb_phrase(s,X1=>Q1,X2=>Q2),noun(s,Q2).
-%question1(Q) --> [give,me],verb_phrase(s,_X=>Q).
-%question1(Q)--> [what],verb_phrase(N,_X=>Q).
+question1(Q) --> [is],a,noun(s,X=>Q),a,hypernym(s,X).
+question1(Q) --> [what,kinds,of],hypernym(s,_X=>Q),[do,you,know].
+question1(Q) --> [give,me,an,example,of],a,hypernym(s,_X=>Q).
+question1(Q) --> [what,is],a,noun(s,_X=>Q).
+
 
 
 % question --------------------------- || positive answer (s) --------- || negative answer -------------------------------
@@ -204,19 +210,18 @@ command(g(true,"I can do a little bit of logical reasoning. You can talk with me
 
 
 % New Commands %%%
+command(g(true,"Yes, you are a genius.")) --> [am,i,a,genius].
 
-%command(g(example(X,Answer),Answer)) --> giveme,[X].
-command(g(example(X,Answer),Answer)) --> giveme,noun(s, X).
-command(g(kinds(X,Answer),Answer)) --> [what,kinds,of],noun(s, X),[do,you,know].
 
 
 % phrase shortenings %%%
 
-giveme --> [give,me,an,example,of,a].
-giveme --> [give,me,an,example,of,an].
-giveme --> [give].
+kind --> [].
+kind --> [kind,of].
+kind --> [type,of].
 
-hypo --> [hyponym,is,an,example,of,a].
+
+example --> [example,of],a.
 
 thanks --> [thank,you].
 thanks --> [thanks].
@@ -246,6 +251,8 @@ tellmeabout --> [tell,me,about].
 tellmeabout --> [who,is].
 tellmeabout --> [tell,me],all,[about].
 
+a --> [a].
+a --> [an].
 
 %%%% predicates %%%%%%%%%%%%%%
 
@@ -257,17 +264,7 @@ random_fact(X):-
 	random_member(X,["walruses can weigh up to 1900 kilograms", "There are two species of walrus - Pacific and Atlantic", "Walruses eat molluscs", "Walruses live in herds","Walruses have two large tusks"]).
 
 
-% New Predicates %%%
 
-example(N,A):-
-%pred2gr(_P,1,n/Noun,PN),
-%noun(s,N),
-phrase(noun(s,N),L),
-append([hyponym,is,an,example,of,a],L,X),
-%phrase(noun,X),
-%(N:-X).
-%atomics_to_string([hyponym,is,an,example,of,Z]," " ,A).
-atomics_to_string(X," ",A).
 
 
 %%% various stuff for specfic events
@@ -297,3 +294,92 @@ atomics_to_string(X," ",A).
 % 
 % iai("The Centre for Doctoral Training in Interactive Artificial Intelligence will train the next generation of innovators in human-in-the-loop AI systems, enabling them to responsibly solve societally important problems. You can ask Peter for more information.").
 % 
+
+%sentence1([(L:-true)]) --> a,noun(s,X),[is],a,hypernym(s,X=>L).
+%sentence1([(L:-true)]) --> a,hyponym(s,X),[is],a,noun(s,X=>L).
+
+%sentence1([(L:-true)]) --> [a],noun(s,X),[is,a],hypernym(s,X=>L).
+%sentence1([(hypernym(s,M):-true)])--> [a],noun(s,M),[is,a],hypernym(s,M).
+%sentence1(C) --> [a],noun(s,M),[is,a],hypernym(s,M).
+%sentence1(_C) --> [a],hyponym(s,M),[is,a],noun(s,M).
+
+% property(s,M) --> [a],hypernym(s,M).
+
+%[a, dog, is, a, kind, of, canine]
+%[a, dog, is, a, canine]
+%noun(s,dog) --> [dog].
+%hypernym(s,dog) --> [canine].
+
+%hypernym(s,dog) --> [canine, domesticated_animal].
+%hypernym(s,dog) --> [domesticated_animal].
+
+%[every,dog,is,a,animal]
+
+
+% New Predicates %%%
+%
+%example(N,A):-
+%%pred2gr(_P,1,n/Noun,PN),
+%%noun(s,N),
+%phrase(noun(s,N),L),
+%append([hyponym,is,an,example,of,a],L,X),
+%%phrase(noun,X),
+%%(N:-X).
+%%atomics_to_string([hyponym,is,an,example,of,Z]," " ,A).
+%atomics_to_string(X," ",A).
+
+%giveme --> [give,me,an,example,of,a].
+%giveme --> [give,me,an,example,of,an].
+%giveme --> [give].
+
+%hypo --> [hyponym,is,an,example,of,a].
+
+%command(g(example(X,Answer),Answer)) --> giveme,[X].
+%command(g(example(X,Answer),Answer)) --> giveme,noun(s, X).
+%command(g(kinds(X,Answer),Answer)) --> [what,kinds,of],noun(s, X),[do,you,know].
+
+%hyper(s,M)          --> [Noun],   {hyper2gr(_P,1,Noun,M)}.
+%hyper(dog, 1,[canine,canid,domestic_animal,domesticated_animal]).
+%{hyper2gr(_P,1,Noun,M)}.
+
+%hypernym(s,X):-[X].
+%[X]:-hyponym(s,X).
+
+%noun(s,dog) --> [dog].
+
+
+
+
+%question1(Q) --> [is],property(s,X),property(s,X=>Q).
+%question1((Q1,Q2)) --> [is],property(N,X),property(N,X=>Q).
+%question1((Q1,Q2)) --> [what],kinds(X1=>Q1,X2=>Q2,C),noun(s,X=>Q1),[do,you,know].
+%question1((Q1,Q2)) --> verb_phrase(N,X1),kverb_phrase(N,X1,X2),noun(s,X2).
+%question1((Q1,Q2)) --> [is,a],noun(s,X1),kverb_phrase(s,X1=>Q1,X2=>Q2),noun(s,Q2).
+%question1(Q) --> [give,me],verb_phrase(s,_X=>Q).
+%question1(Q)--> [what],verb_phrase(N,_X=>Q).
+
+% New Grammar Rules %%%%%%%%%%%%%%
+%sentence1(C) --> hyponym,verb_phrase(N,M).
+%sentence1(C) --> property(N,M1), kind(N,M2).
+%sentence1(C) --> property(N,M1), kverb_phrase(N,M2).
+%sentence1(C) --> property(s,M1), kind(M1,M2,C), noun(s,M2).
+%sentence1(C) --> property(N,M1), verb_phrase(N,M1,M2,C), noun(s,M2).
+
+%hyponym --> [hyponym,is].
+
+%verb_phrase(s,M1,M2,C) --> [is],kind(M1,M2,C).
+%verb_phrase(p,M1,M2,C) --> [are],kind(M1,M2,C).
+%verb_phrase(p,M1,M2,C) --> [are],kinds(M1,M2,C).
+%kverb_phrase(p,M) --> [are],kind(p,M).
+%kverb_phrase(s,M) --> [is],kind(s,M).
+%kverb_phrase(p,M) --> [are],kind(p,M).
+%verb_phrase(s,M) --> [an,example,of],property(s,M).
+
+%kind(s,M) --> [is,a,kind,of],noun(s,M).
+%kind(s,M) --> [are kinds of],noun(p,M).
+
+%kind(X1=>B,X2=>H,[(H:-B)]) --> [a,kind,of].
+%kinds(X1=>B,X2=>H,[(H:-B)]) --> [kinds,of].
+
+%kind(s,M) --> [a,kind,of],noun(s,M).
+%kind(p,M) --> [kinds,of],noun(p,M).
