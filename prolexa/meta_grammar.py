@@ -175,7 +175,6 @@ def handle_hyper(lines, i, hyper_text, hyper_tags):
     # Get a string of hypernyms
     hypernyms = wnf.get_hypernym(input_word)
 
-
     # for all the lines after the fist predicate definition
     for noun_idx, noun_line in enumerate(lines[i:]):
 
@@ -221,10 +220,12 @@ def handle_hypo(lines, i, hypo_text, hypo_tags):
     end = ', '
     exists = False
     new_line = ''
+    # get first noun from input
     input_word = hypo_text[hypo_tags.index(nn)]
     _, input_word = is_plural(input_word)
     hypo_text[hypo_tags.index(nn)] = input_word
 
+    # Get a string of hyponyms
     hyponyms = wnf.get_hyponym(input_word)
 
     # for all the lines after the fist predicate definition
