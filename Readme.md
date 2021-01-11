@@ -1,195 +1,103 @@
-# Prolexa #
-This repository contains Prolog code for a simple question-answering assistant.
+
+# Hyprolexa #
+<!--This repository contains Prolog code for a simple question-answering assistant.
 The top-level module is `prolexa/prolog/prolexa.pl`, which can either be run in
 the command line or with speech input and output through the
-[alexa developer console](https://developer.amazon.com/alexa/console/ask).
+[alexa developer console](https://developer.amazon.com/alexa/console/ask).-->
 
-The heavy lifting is done in `prolexa/prolog/prolexa_grammar.pl`, which defines
-DCG rules for sentences (that are added to the knowledge base if they don't
-already follow), questions (that are answered if possible), and commands (e.g.,
-explain why something follows); and `prolexa/prolog/prolexa_engine.pl`, which
-implements reasoning by means of meta-interpreters.
 
-Also included are `prolexa/prolog/nl_shell.pl`, which is taken verbatim from
-Chapter 7 of *Simply Logical*, and an extended version
-`prolexa/prolog/nl_shell2.pl`, which formed the basis for the *prolexa* code.
 
-The code has been tested with [SWI Prolog](https://www.swi-prolog.org) versions
-7.6.0, 8.0.3 and 8.2.2.
+ Hyprolexa extends the functionality of the question-answering assistant Prolexa, by giving it the ability to discuss hypernyms and hyponyms for nouns.
 
-## Command-line interface ##
-(The code is executed from the `prolexa/prolog` directory.)
+Hyprolexa is built on Prolexa-Plus, which creates a bridge between Prolexa and Python. This bridge extends prolexa's linguistic knowledge with Wordnet from Python's Natural Language Toolkit (NLTK). 
+
+<!--part-of-speech tagging of nouns-->
+
+## How to talk with Hyprolexa ##
+
+Hyprolexa loves animal facts.
 
 ```
-% swipl prolexa.pl
-Welcome to SWI-Prolog (threaded, 64 bits, version 8.0.3)
-SWI-Prolog comes with ABSOLUTELY NO WARRANTY. This is free software.
-Please run ?- license. for legal details.
+🤖: Hello! I'm Hyprolexa! Did you know that a dog is a kind of domesticated animal? 🐕 Anyway...
+🧠: a cat is a kind of feline.
+*** utterance(a cat is a kind of feline)
+*** rule([(isa(=>(_40780,feline(_40780)),=>(_40540,cat(_40540))):-true)])
+*** [(isa(=>(_40780,feline(_40780)),=>(_40540,cat(_40540))):-true)]
+🤖: Ooooooh, I will remember that a cat is a feline.
+```
+Once you've told Hyprolexa about a hyper-/hyponym, Hyprolexa remembers.
 
-For online help and background, visit http://www.swi-prolog.org
-For built-in help, use ?- help(Topic). or ?- apropos(Word).
-
-?- prolexa_cli.
-prolexa> "Tell me everything you know".
-*** utterance(Tell me everything you know)
-*** goal(all_rules(_7210))
-*** answer(every human is mortal. peter is human)
-every human is mortal. peter is human
-prolexa> "Peter is mortal".
-*** utterance(Peter is mortal)
-*** rule([(mortal(peter):-true)])
-*** answer(I already knew that Peter is mortal)
-I already knew that Peter is mortal
-prolexa> "Explain why Peter is mortal".
-*** utterance(Explain why Peter is mortal)
-*** goal(explain_question(mortal(peter),_8846,_8834))
-*** answer(peter is human; every human is mortal; therefore peter is mortal)
-peter is human; every human is mortal; therefore peter is mortal
+```
+🧠: is a cat a kind of feline?
+*** utterance(is a cat a feline)
+*** query(isa(=>(_28752,feline(_28752)),=>(_28688,cat(_28688))))
+🤖: a cat is feline
 ```
 
----
+knowledge_store.pl is a dynamic information store which keeps information from your conversations with Hyprolexa. Hyprolexa has the additional feature of allowing you to return to previous conversations. This means Hyprolexa will remember any previous facts you told it.
 
-## Amazon Alexa and Prolog integration ##
-Follow the steps below if you want to use the Amazon Alexa speech to text and
-text to speech facilities.
-This requires an HTTP interface that is exposed to the web, for which we use
-[Heroku](http://heroku.com).
-
-### Generating intent json for Alexa ###
 ```
-swipl -g "mk_prolexa_intents, halt." prolexa.pl
-```
-The intents are found in `prolexa_intents.json`. You can copy and paste the
-contents of this file while building your skill on the
-[alexa developer console](https://developer.amazon.com/alexa/console/ask).
-
-
-### Localhost workflow (Docker) ###
-To build:
-```
-docker build . -t prolexa
+🤖: Before we begin, would you like to jog my memory? Give me the name of an existing knowledge store...
+🧠: knowledge_store_11161922 
+🤖: Oh yes, I remember now!
 ```
 
-To run:
+If knowledge_store_11161922 was saved for a conversation you had about snakes, Hyprolexa will remember the relevant hypo- and hypernyms. 
+
 ```
-docker run -it -p 4000:4000 prolexa
+🤖: 
+🧠: knowledge_store_11161922 
+🤖: Oh yes, I remember now!
+🧠: is a viper a snake?
+*** utterance(is a viper a snake)
+*** query(isa(=>(_48460,snake(_48460)),=>(_48396,viper(_48396))))
+🤖: a viper is snake
 ```
 
-To test the server:
+## Hyprolexa's Grammar ##
+
+Hyprolexa's way of dealing with hyper- and hyponyms is based on Chapters 4 and 7 of *SimplyLogical*: https://book.simply-logical.space/ 
+
+Hyponyms and hypernyms are stored in the format:
 ```
-curl -v POST http://localhost:4000/prolexa -d @testjson --header "Content-Type: application/json"
+hyper(animal, 1,[organism,being]).
+
+hypo(animal, 1,[acrodont,adult,biped,captive,chordate,creepy-crawly,critter,darter,domestic_animal,domesticated_animal,embryo,conceptus,fertilized_egg,feeder,female,fictional_animal,game,giant,herbivore,hexapod,homeotherm,homoiotherm,homotherm,insectivore,invertebrate,larva,male,marine_animal,marine_creature,sea_animal,sea_creature,mate,metazoan,migrator,molter,moulter,mutant,omnivore,peeper,pest,pet,pleurodont,poikilotherm,ectotherm,predator,predatory_animal,prey,quarry,racer,range_animal,scavenger,stayer,stunt,survivor,thoroughbred,purebred,pureblood,varmint,varment,work_animal,young,offspring,zooplankton]).
 ```
 
-### Heroku workflow ###
+Input sentences about hypernyms and hyponyms are parsed in prolexa_grammar.pl. 
+
+```
+sentence1([(L:-true)]) --> a,noun(s,M1),[is],kinds(_,M2=>M1=>L),hypernym(s,M2,M1).
+sentence1([(L:-true)]) --> noun(p,M1),[are],kinds(_,M2=>M1=>L),hypernym(s,M2,M1).
+sentence1([(L:-true)]) --> noun(p,M1),[are],kinds(_,M2=>M1=>L),hypernym(p,M2,M1).
+```
+
+prolexa_grammar.pl is also the file file which deals with queries.
+
+```
+question1(Q) --> [is],a,noun(N,M1),kinds(N,M2=>M1=>Q),noun(s,M2).
+question1(Q) --> [what],kinds(N,M2=>M1=>Q),hypernym(N,M2,M1),[do,you,know].
+```
+
+## Hyprolexa's Architecture ##
+
+The Hyprolexa.py file holds the main loop passes text from the input to Prolexa and passes the output back.
+
+Prior to passing this input to prolog, Flair is used for part-of-speech tagging to extract nouns from the sentence. These nouns are passed to functions held in wordnet_functions.py, which searches for hypo- and hypernyms of the nouns in the Wordnet database. This information is passed to the knowledge_store and stored in the format seen above.
+
 #### Initial setup ####
-Prerequisites:
-
-- Docker app running in the background.
-- Installed Heroku CLI (`brew install heroku/brew/heroku` on MacOS).
-
----
-
-To see the status of your Heroku webapp use
-```
-heroku logs
-```
-
-in the `prolexa` directory.
-
----
 
 1. Clone this repository
     ```
-    git clone git@github.com:So-Cool/prolexa.git
+    git clone ---.git
     cd prolexa
     ```
 
-2. Login to Heroku
-    ```
-    heroku login
-    ```
-
-3. Add Heroku remote
-    ```
-    heroku git:remote -a prolexa
-    ```
-
-#### Development workflow ####
-1. Before you start open your local copy of Prolexa and login to Heroku
-    ```
-    cd prolexa
-    heroku container:login
-    ```
-
-2. Change local files to your liking
-3. Once you're done push them to Heroku
-    ```
-    heroku container:push web
-    heroku container:release web
-    ```
-
-4. Test your skill and repeat steps *2.* and *3.* if necessary
-5. Once you're done commit all the changes and push them to GitHub
-    ```
-    git commit -am "My commit message"
-    git push origin master
-    ```
-
----
-
-# Prolexa Plus #
-Prolexa Plus is an extension to Prolexa which uses NLTK and Flair for part-of-speech tagging of nouns, verbs 
-and other words that are not currently in Prolexa's lexicon. It was implemented by 
-[Gavin Leech](https://github.com/g-leech) and [Dan Whettam](https://github.com/DWhettam)
-from the CDT19 cohort.
-
-```
-% python prolexa/prolexa_plus.py
-2020-11-10 18:33:12,559 loading file /Users/cspaf/.flair/models/en-pos-ontonotes-v0.5.pt
-Hello! I'm ProlexaPlus! Tell me anything, ask me anything.
-> tell me about Kacper
-*** utterance(tell me about Kacper)
-*** goal(all_answers(kacper,_60700))
-*** answer(I know nothing about kacper)
-I know nothing about kacper
-> Kacper is a postdoc
-*** utterance(Kacper is a postdoc)
-*** rule([(postdoc(kacper):-true)])
-*** answer(I will remember that Kacper is a postdoc)
-I will remember that Kacper is a postdoc
-> every postdoc is busy
-*** utterance(every postdoc is busy)
-*** rule([(busy(_53392):-postdoc(_53392))])
-*** answer(I will remember that every postdoc is busy)
-I will remember that every postdoc is busy
-> Kacper is busy
-*** utterance(Kacper is busy)
-*** rule([(busy(kacper):-true)])
-*** answer(I already knew that Kacper is busy)
-I already knew that Kacper is busy
-> explain why Kacper is busy
-*** utterance(explain why Kacper is busy)
-*** goal(explain_question(busy(kacper),_3046,_2824))
-*** answer(kacper is a postdoc; every postdoc is busy; therefore kacper is busy)
-kacper is a postdoc; every postdoc is busy; therefore kacper is busy
-```
-
-Prolexa Plus requires Python 3.6+ and SWI Prolog version 7.6.0+.
-Using a Python virtual environment is advised.
-Since the Prolog<->Python bridge is quite fragile, you should consider using:
-
-* *Windows Subsystem for Linux* if you are on Windows,
-* *Ubuntu Linux*,
-* *MacOS*, or
-* the provided *Docker image* (see below)
-
-to minimise potential issues.
-For more information on how to set up `pyswip` see:
-
-* <https://github.com/yuce/pyswip/blob/master/INSTALL.md> and
-* <https://github.com/yuce/pyswip>.
 
 ## Installation ##
+
+<!--
 ### `pip install` ###
 This installation approach is recommended.
 The installation script may take a moment when processing the Prolexa package
@@ -214,7 +122,7 @@ This installation comes with two command line tools:
   models.
 
 ### Executing Source ###
-1. Install Python dependencies
+<!--1. Install Python dependencies
    ```
    pip install -r requirements.txt
    ```
@@ -226,23 +134,4 @@ This installation comes with two command line tools:
    ```
    PYTHONPATH=./ python prolexa/prolexa_plus.py
    ```
-
-### Docker ###
-Instead of a local install, it is possible to run *Prolexa Plus* with the
-designated Docker image.
-
-1. Build the *Prolexa Plus* Docker image
-   ```
-   docker build -t prolexa-plus -f Dockerfile-prolexa-plus ./
-   ```
-2. Run *Prolexa Plus* via Docker
-   ```
-   docker run -it prolexa-plus
-   ```
-
-## Tests ##
-**Python tests are currently broken.**
-To test the code execute
-```
-python prolexa/tests/test.py
-```
+-->
