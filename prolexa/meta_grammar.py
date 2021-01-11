@@ -493,7 +493,6 @@ def update_rules(tagger, text):
         # Check to find the place in knowledge store where other predicates are saved
         pred_match = r'pred\((.*)[1],\[(.*)\]\)\.'
 
-
         # Handle Nouns, Adjectives and Verbs as predicates
         if (POS.NOUN.value in tags) and re.match(pred_match, line):
             lines = handle_noun(lines, idx, text, tags)

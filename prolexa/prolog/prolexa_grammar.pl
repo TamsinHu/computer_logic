@@ -10,12 +10,20 @@ utterance(C) --> command(C).
 %%% lexicon, driven by predicates %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 adjective(_,M)		--> [Adj],    {pred2gr(_P,1,a/Adj, M)}.
-noun(s,M)			--> [Noun],   {pred2gr(_P,1,n/Noun,M)}.
-noun(p,M)			--> [Noun_p], {pred2gr(_P,1,n/Noun,M),noun_s2p(Noun,Noun_p)}.
+noun(s,M)		--> [Noun],   {pred2gr(_P,1,n/Noun,M)}.
+noun(p,M)		--> [Noun_p], {pred2gr(_P,1,n/Noun,M),noun_s2p(Noun,Noun_p)}.
+noun(s,M,_)    --> [Noun],   {pred2gr(_P,1,n/Noun,M)}.
 iverb(s,M)			--> [Verb_s], {pred2gr(_P,1,v/Verb,M),verb_p2s(Verb,Verb_s)}.
 iverb(p,M)			--> [Verb],   {pred2gr(_P,1,v/Verb,M)}.
 
-hypernym(s,M)          --> [Noun],   {hyper2gr(_P,1,Noun,M)}.
+
+hypernym(s,M2,M1)     --> [Noun],   {hyper2gr(_P,1,Noun,M1,M2)}.
+hypernym(p,M2,M1)     --> [Noun_p], {hyper2gr(_P,1,Noun,M1,M2),noun_s2p(Noun,Noun_p)}.
+
+%hypernym(s,noun(s,feline),noun(s,cat)) --> [cat].
+%hypernym(s,(X,feline(X)),(Y,cat(Y))) --> [cat].
+
+%hypernym(s,M)     --> [Noun],   {hyper2gr(_P,1,Noun,M)}.
 hyponym(s,M)           --> [Noun],   {hypo2gr(_P,1,Noun,M)}.
 
 % hypernyms
@@ -26,6 +34,9 @@ hypo(dog, 1,[puppy,pooch,doggie,doggy,barker,bowwow,cur,mongrel,mutt,lapdog,toy_
 
 % unary predicates for adjectives, nouns and verbs
 pred(dog,     1,[n/dog]).
+pred(canine,  1,[n/canine]).
+%pred(cat,     1,[n/cat]).
+%pred(feline,  1,[n/feline]).
 pred(human,   1,[a/human,n/human]).
 pred(mortal,  1,[a/mortal,n/mortal]).
 pred(man,     1,[a/male,n/man]).
@@ -44,11 +55,22 @@ pred2gr(P,1,C/W,X=>Lit):-
 	pred(P,1,L),
 	member(C/W,L),
 	Lit=..[P,X].
+	%write_debug('hereiam'),
+	%write_debug(P),
+	%write_debug(X),
+	%write_debug(Lit).
 
-hyper2gr(P,1,W,X=>Lit):-
+%hyper2gr(P,1,W,X=>Lit):-
+%	hyper(P,1,L),
+%	member(W,L),
+%	Lit=..[P,X].
+
+%
+hyper2gr(P,1,W,X=>Lit, Y=>Lit2):-
 	hyper(P,1,L),
 	member(W,L),
-	Lit=..[P,X].
+	Lit=..[P,X],
+	Lit2=..[W,Y].
 
 hypo2gr(P,1,W,X=>Lit):-
 	hypo(P,1,L),
@@ -75,16 +97,22 @@ sentence(C) --> sword,sentence1(C).
 sword --> [].
 sword --> [that].
 
-
 % most of this follows Simply Logical, Chapter 7
 
 % Original Grammar Rules %%%%%%%%%%%%%%%
 sentence1(C) --> determiner(N,M1,M2,C),noun(N,M1),verb_phrase(N,M2).
 sentence1([(L:-true)]) --> proper_noun(N,X),verb_phrase(N,X=>L).
 % new
-sentence1([(L:-true)]) --> a,noun(s,X),[is],a,kind,hypernym(s,X=>L).
-sentence1([(L:-true)]) --> a,noun(s,X=>L),[is],a,example,hypernym(s,X).
-sentence1([(L:-true)]) --> a,hyponym(s,X),[is],a,kind,noun(s,X=>L).
+
+sentence1([(L:-true)]) --> a,noun(s,M1),[is],kinds(_,M2=>M1=>L),hypernym(s,M2,M1).
+sentence1([(L:-true)]) --> noun(p,M1),[are],kinds(_,M2=>M1=>L),hypernym(s,M2,M1).
+sentence1([(L:-true)]) --> noun(p,M1),[are],kinds(_,M2=>M1=>L),hypernym(p,M2,M1).
+%sentence1([(L:-true)]) --> a,noun(s,X=>L),[is],a,example,hypernym(s,X).
+%sentence1([(L:-true)]) --> a,hyponym(s,X),[is],a,kind,noun(s,X=>L).
+
+kinds(_,X=>Y=>isa(X,Y)) --> [].
+kinds(s,X=>Y=>isa(X,Y)) --> a,kind.
+kinds(_,X=>Y=>isa(X,Y)) --> kinds.
 
 
 verb_phrase(s,M) --> [is],property(s,M).
@@ -141,11 +169,13 @@ question1(Q) --> [is],proper_noun(N,X),property(N,X=>Q).
 question1(Q) --> [does],proper_noun(_,X),verb_phrase(_,X=>Q).
 %question1((Q1,Q2)) --> [are,some],noun(p,sk=>Q1),property(p,sk=>Q2).
 
-% new questions
-question1(Q) --> [is],a,noun(s,X=>Q),a,hypernym(s,X).
-question1(Q) --> [what,kinds,of],hypernym(s,_X=>Q),[do,you,know].
-question1(Q) --> [give,me,an,example,of],a,hypernym(s,_X=>Q).
-question1(Q) --> [what,is],a,noun(s,_X=>Q).
+
+question1(Q) --> [is],a,noun(N,M1),kinds(N,M2=>M1=>Q),noun(s,M2).
+question1(Q) --> [what],kinds(N,M2=>M1=>Q),hypernym(N,M2,M1),[do,you,know].
+%question1(Q) --> [give,me,an,example,of],a,kinds(s,M2=>M1=>Q),hypernym(s,M2,M1).
+%question1(Q) --> [what,is],a,kinds(s,M2=>M1=>Q),hypernym(s,M2,M1). % switched M1&M2 for hypo
+
+
 
 
 
@@ -193,25 +223,20 @@ command(g(retractall(prolexa:stored_rule(_,C)),"I erased it from my memory")) --
 command(g(retractall(prolexa:stored_rule(_,_)),"I am a blank slate")) --> forgetall. 
 command(g(all_rules(Answer),Answer)) --> kbdump. 
 command(g(all_answers(PN,Answer),Answer)) --> tellmeabout,proper_noun(s,PN).
+command(g(all_answers(N,Answer),Answer)) --> tellmeabout,noun(s,N).
 command(g(explain_question(Q,_,Answer),Answer)) --> [explain,why],sentence1([(Q:-true)]).
 command(g(random_fact(Fact),Fact)) --> getanewfact.
-%command(g(pf(A),A)) --> peterflach. 
-%command(g(iai(A),A)) --> what. 
 command(g(rr(A),A)) --> thanks.
 
 % The special form
 %	command(g(true,<response>)) --> <sentence>.
 % maps specific input sentences to specific responses.
 
-command(g(true,"I can do a little bit of logical reasoning. You can talk with me about humans and birds.")) --> [what,can,you,do,for,me,minerva].
-%command(g(true,"Your middle name is Adriaan")) --> [what,is,my,middle,name].
-%command(g(true,"Today you can find out about postgraduate study at the University of Bristol. This presentation is about the Centre for Doctoral Training in Interactive Artificial Intelligence")) --> today.
-%command(g(true,"The presenter is the Centre Director, Professor Peter Flach")) --> todaysspeaker.
+command(g(true,"I can do a little bit of logical reasoning. You can talk with me about humans and birds.")) --> [what,can,you,do,for,me,hyprolexa].
 
 
 % New Commands %%%
 command(g(true,"Yes, you are a genius.")) --> [am,i,a,genius].
-
 
 
 % phrase shortenings %%%
@@ -219,7 +244,8 @@ command(g(true,"Yes, you are a genius.")) --> [am,i,a,genius].
 kind --> [].
 kind --> [kind,of].
 kind --> [type,of].
-
+kinds --> [kinds,of].
+kinds --> [types,of].
 
 example --> [example,of],a.
 
@@ -264,8 +290,80 @@ random_fact(X):-
 	random_member(X,["walruses can weigh up to 1900 kilograms", "There are two species of walrus - Pacific and Atlantic", "Walruses eat molluscs", "Walruses live in herds","Walruses have two large tusks"]).
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% BELOW HERE IS DETRITIS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%sentence1([(L:-true)]) --> a,noun(s,X),[is],a,kind,hypernym(s,X=>L).
+%sentence1([(L:-true)]) --> a,noun(s,X=>L),[is],a,example,hypernym(s,X).
+%sentence1([(L:-true)]) --> a,hyponym(s,X),[is],a,kind,noun(s,X=>L).
+%trial
+%sentence1([(L:-true)]) --> a,noun(s,X=>L),[is],a,kind,hypernym(s,X1,X=>L).
+
+%sentence1([(L:-true)]) --> a,noun(N,Xn),kverb_phrase(N,Xn,Xn=>L).
+%%sentence1([(L:-true)]) --> a,hyponym(N,X),kverb_phraseo(N,X=>L).
+%kverb_phrase(N,Xn,Y) --> transitive_verb(X=>Y),hypernym(N,Xn,X).
+%%kverb_phraseo(N,M) --> transitive_verb(Y=>M),noun(N,Y).
+%%transitive_verbr(Y=>X=>isa(X,Y)) --> [is],a,kind.
+%transitive_verb(Y=>X=>isa(X,Y)) --> [is],a,kind.
 
 
+%sentence1([(L:-true)]) --> a,noun(N,X),kverb_phrase(N,Xn,Xn=>L).
+%%sentence1([(L:-true)]) --> a,hyponym(N,X),kverb_phraseo(N,X=>L).
+%kverb_phrase(N,Xn,Y) --> transitive_verb(X=>Y),hypernym(N,Xn,X).
+%%kverb_phraseo(N,M) --> transitive_verb(Y=>M),noun(N,Y).
+%%transitive_verbr(Y=>X=>isa(X,Y)) --> [is],a,kind.
+%transitive_verb(Y=>X=>isa(X,Y)) --> [is],a,kind.
+
+
+
+%sentence1([(hypernym(s,M2,M1):-true)]) --> a,noun(s,M1),[is],a,kind,hypernym(s,M2,M1).
+%sentence1([(L:-true)]) --> a,noun(N,M1),[is],kverb_phrase(N,M2=>M1=>L),hypernym(s,M2,M1).
+
+%sentence1([(L:-true)]) --> a,noun(N,M1),[is],kverb_phrase(N,M2=>M1=>L),hypernym(s,M2,M1).
+%sentence1([(L:-true)]) --> a,noun(N,M1),[is],kverb_phrase(N,M2=>M1=>L),hypernym(s,M2,M1).
+%hypernym(s,M2,M1) --> hypernym(s,M3,M4).
+
+%sentence1([(L:-true)]) --> a,noun(N,X),verb_phrase(N,Y=>L).
+
+%sentence1([(M1=M3):-true]) --> a,noun(s,M1),[is],a,kind,hypernym(s,M2,M3).
+%sentence1([(hypernym(s,M2,M1):-true)]) --> a,noun(s,M1),[is],a,kind,hypernym(s,M2,M3).
+%sentence1([(isa(M1,M2):-true)]) --> a,noun(s,M1),verb_phrase(s,M2).
+%sentence1([((M1=>M2):-true)]) --> a,noun(s,M1),[is],a,kind,hypernym(s,M2,M1).
+%sentence1([(L:-true)]) --> a,noun(s,M),verb_phrase(s,M=>L).
+%sentence1([(L:-true)]) --> a,noun(N,X1),[is],a,kind,noun(N,X2=>L).
+
+
+% new questions
+%question1(Q) --> [is],a,noun(s,X=>Q),a,hypernym(s,X).
+%question1(Q) --> [what,kinds,of],hypernym(s,_X=>Q),[do,you,know].
+%question1(Q) --> [give,me,an,example,of],a,hypernym(s,_X=>Q).
+%question1(Q) --> [what,is],a,noun(s,_X=>Q).
+
+% trial questions
+%question1(isa(Q1,Q2)) --> [is],a,noun(s,Q1),property(s,Q2).
+%question1(isa(Q1,Q2)) --> [is],a,noun(s,Q1),a,hypernym(s,Q2,Q1).
+%question1((hypernym(s,M2,M1))) --> [is],a,noun(s,M1),a,hypernym(s,M2,M1).
+
+%question1((hypernym(s,M2,M1))) --> [is],a,noun(s,M1),a,kind,noun(s,M2).
+
+%question1(Q) --> [is],kverb_phrase(s,X=>Q),a,kind,noun(s,X).
+%question1(Q) --> kverb_phrase(s,X=>Q),a,kind,noun(s,X). % question has to be wrong way for answer correct
+%question1(Q) --> [is],a,noun(s,X),a,kind,noun(s,X=>Q).
+
+%question1(Q) --> [is],a,noun(s,M1=>Q),a,kind,noun(s,M2).
+%question1((Q1,Q2)) --> [is],a,noun(s,M1=>Q1),a,hypernym(s,M2=>Q2,M1).
+%question1(Q) --> [is],a,noun(N,X1),property(N,X2=>Q).
+%question1(Q) --> [is],a,noun(s,X=>Q),a,hypernym(s,Q).
+%question1(Q) --> [is],a,noun(s,X1=>Q),a,noun(s,X2=>Q).
+
+%command(g(pf(A),A)) --> peterflach.
+%command(g(iai(A),A)) --> what.
+%command(g(true,"Your middle name is Adriaan")) --> [what,is,my,middle,name].
+%command(g(true,"Today you can find out about postgraduate study at the University of Bristol. This presentation is about the Centre for Doctoral Training in Interactive Artificial Intelligence")) --> today.
+%command(g(true,"The presenter is the Centre Director, Professor Peter Flach")) --> todaysspeaker.
 
 %%% various stuff for specfic events
 
@@ -293,7 +391,15 @@ random_fact(X):-
 % pf("According to Wikipedia, Pieter Adriaan Flach is a Dutch computer scientist and a Professor of Artificial Intelligence in the Department of Computer Science at the University of Bristol.").
 % 
 % iai("The Centre for Doctoral Training in Interactive Artificial Intelligence will train the next generation of innovators in human-in-the-loop AI systems, enabling them to responsibly solve societally important problems. You can ask Peter for more information.").
-% 
+%
+
+%verb_phrase(N,M) --> transitive_verb(Y=>M),proper_noun(N,Y).
+%transitive_verb(Y=>X=>likes(X,Y)) --> [likes].
+
+
+%hypernym(s,Noun,M)     --> [Noun],   {hyper2gr(_P,1,Noun,M)}.
+%hypernym(s,hypernym(s,M2,M1),M3) --> [Noun],   {hyper2gr(_P,1,Noun,M2,M3)}.
+
 
 %sentence1([(L:-true)]) --> a,noun(s,X),[is],a,hypernym(s,X=>L).
 %sentence1([(L:-true)]) --> a,hyponym(s,X),[is],a,noun(s,X=>L).

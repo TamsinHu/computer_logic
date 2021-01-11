@@ -21,7 +21,11 @@
 %some intial stored rules
 stored_rule(1,[(mortal(X):-human(X))]).
 stored_rule(1,[(human(peter):-true)]).
-
+stored_rule(1,[(bird(tweety):-true)]).
+%stored_rule(1,[(isa(noun(N,feline),noun(N,cat)):-true)]).
+%stored_rule(1,[(isa(=>(_47124,feline(_47124)),=>(_47066,cat(_47066))):-true)]).
+%stored_rule(1,[(isa(noun(s,feline),noun(s,cat)):-true)]).
+%stored_rule(1,[(cat(feline):-true)]).
 
 %%% Prolexa Command Line Interface %%%
 
@@ -39,7 +43,7 @@ prolexa_cli:-
 % to distinguish between sentences, questions and commands
 handle_utterance(SessionId,Utterance,Answer):-
     % comment/uncomment following line to toggle debugging off/on
-	%write_debug(utterance(Utterance)),
+	write_debug(utterance(Utterance)),
 	% normalise Utterance into list of atoms
 	split_string(Utterance," ","",StringList),	% tokenize by spaces
 	maplist(string_lower,StringList,StringListLow),	% all lowercase
@@ -47,7 +51,7 @@ handle_utterance(SessionId,Utterance,Answer):-
 % A. Utterance is a sentence 
 	( phrase(sentence(Rule),UtteranceList),
 	  % comment/uncomment following line to toggle debugging off/on
-	  %write_debug(rule(Rule)),
+	  write_debug(rule(Rule)),
 	  ( known_rule(Rule,SessionId) -> % A1. It follows from known rules
 			atomic_list_concat(['I already knew that ',Utterance,'.'],'',Answer)
 	  ; otherwise -> % A2. It doesn't follow, so add to stored rules
@@ -57,18 +61,18 @@ handle_utterance(SessionId,Utterance,Answer):-
 % B. Utterance is a question that can be answered
 	; phrase(question(Query),UtteranceList),
 	  % comment/uncomment following line to toggle debugging off/on
-	  %write_debug(query(Query)),
+	  write_debug(query(Query)),
 	  prove_question(Query,SessionId,Answer) -> true
 % C. Utterance is a command that succeeds
 	; phrase(command(g(Goal,Answer)),UtteranceList),
 	  % comment/uncomment following line to toggle debugging off/on
-	  %write_debug(goal(Goal)),
+	  write_debug(goal(Goal)),
 	  call(Goal) -> true
 % D. None of the above
 	; otherwise -> atomic_list_concat(['I heard you say, "',Utterance,'", could you rephrase that please?'],'',Answer)
 	).
 	% comment/uncomment following line to toggle debugging off/on
-	%write_debug(answer(_Answer)).
+	write_debug(answer(_Answer)).
 
 write_debug(Atom):-
 	write(user_error,'*** '),writeln(user_error,Atom),flush_output(user_error).
