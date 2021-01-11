@@ -14,7 +14,7 @@ def get_hypernym(noun):
         for lemma in nym.lemmas():
             lemmas.append(lemma)
     lemmas = [str(lemma.name()).lower() for lemma in lemmas]
-    lemmas = str(lemmas).replace("'","").replace(" ","")
+    lemmas = str(lemmas).replace("'","").replace(" ","").replace('.', '')
     return lemmas
 
 
@@ -30,5 +30,5 @@ def get_hyponym(noun):
         for lemma in nym.lemmas():
             lemmas.append(lemma)
     lemmas = [str(lemma.name()).lower() for lemma in lemmas]
-    lemmas = str(lemmas).replace("'","").replace(" ","")
+    lemmas = str(lemmas).replace("'","").replace(" ","").replace('.', '')
     return lemmas
