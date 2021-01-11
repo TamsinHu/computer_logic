@@ -12,19 +12,14 @@ utterance(C) --> command(C).
 adjective(_,M)		--> [Adj],    {pred2gr(_P,1,a/Adj, M)}.
 noun(s,M)		--> [Noun],   {pred2gr(_P,1,n/Noun,M)}.
 noun(p,M)		--> [Noun_p], {pred2gr(_P,1,n/Noun,M),noun_s2p(Noun,Noun_p)}.
-noun(s,M,_)    --> [Noun],   {pred2gr(_P,1,n/Noun,M)}.
 iverb(s,M)			--> [Verb_s], {pred2gr(_P,1,v/Verb,M),verb_p2s(Verb,Verb_s)}.
 iverb(p,M)			--> [Verb],   {pred2gr(_P,1,v/Verb,M)}.
-
 
 hypernym(s,M2,M1)     --> [Noun],   {hyper2gr(_P,1,Noun,M1,M2)}.
 hypernym(p,M2,M1)     --> [Noun_p], {hyper2gr(_P,1,Noun,M1,M2),noun_s2p(Noun,Noun_p)}.
 
-%hypernym(s,noun(s,feline),noun(s,cat)) --> [cat].
-%hypernym(s,(X,feline(X)),(Y,cat(Y))) --> [cat].
-
-%hypernym(s,M)     --> [Noun],   {hyper2gr(_P,1,Noun,M)}.
-hyponym(s,M)           --> [Noun],   {hypo2gr(_P,1,Noun,M)}.
+hyponym(s,M1,M2)      --> [Noun],   {hypo2gr(_P,1,Noun,M1,M2)}.
+%hyponym(p,M1,M2)      --> [Noun_p], {hypo2gr(_P,1,Noun,M1,M2),noun_s2p(Noun,Noun_p)}.
 
 % hypernyms
 hyper(dog, 1,[canine,canid,domestic_animal,domesticated_animal]).
@@ -55,27 +50,18 @@ pred2gr(P,1,C/W,X=>Lit):-
 	pred(P,1,L),
 	member(C/W,L),
 	Lit=..[P,X].
-	%write_debug('hereiam'),
-	%write_debug(P),
-	%write_debug(X),
-	%write_debug(Lit).
 
-%hyper2gr(P,1,W,X=>Lit):-
-%	hyper(P,1,L),
-%	member(W,L),
-%	Lit=..[P,X].
-
-%
 hyper2gr(P,1,W,X=>Lit, Y=>Lit2):-
 	hyper(P,1,L),
 	member(W,L),
 	Lit=..[P,X],
 	Lit2=..[W,Y].
 
-hypo2gr(P,1,W,X=>Lit):-
+hypo2gr(P,1,W,X=>Lit,Y=>Lit2):-
 	hypo(P,1,L),
 	member(W,L),
-	Lit=..[P,X].
+	Lit=..[P,X],
+    Lit2=..[W,Y].
 
 noun_s2p(Noun_s,Noun_p):-
 	( Noun_s=woman -> Noun_p=women
@@ -87,8 +73,6 @@ verb_p2s(Verb_p,Verb_s):-
 	( Verb_p=fly -> Verb_s=flies
 	; 	atom_concat(Verb_p,s,Verb_s)
 	).
-
-
 
 %%% sentences %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -104,16 +88,16 @@ sentence1(C) --> determiner(N,M1,M2,C),noun(N,M1),verb_phrase(N,M2).
 sentence1([(L:-true)]) --> proper_noun(N,X),verb_phrase(N,X=>L).
 % new
 
-sentence1([(L:-true)]) --> a,noun(s,M1),[is],kinds(_,M2=>M1=>L),hypernym(s,M2,M1).
-sentence1([(L:-true)]) --> noun(p,M1),[are],kinds(_,M2=>M1=>L),hypernym(s,M2,M1).
-sentence1([(L:-true)]) --> noun(p,M1),[are],kinds(_,M2=>M1=>L),hypernym(p,M2,M1).
-%sentence1([(L:-true)]) --> a,noun(s,X=>L),[is],a,example,hypernym(s,X).
-%sentence1([(L:-true)]) --> a,hyponym(s,X),[is],a,kind,noun(s,X=>L).
+sentence1([(L:-true)]) --> a,noun(s,M1),is(s),kinds(_,M2=>M1=>L),hypernym(s,M2,M1).
+sentence1([(L:-true)]) --> noun(p,M1),is(p),kinds(_,M2=>M1=>L),hypernym(_N,M2,M1).
+sentence1([(L:-true)]) --> a,hyponym(s,M1,M2),is(s),kinds(_,M1=>M2=>L),noun(s,M1).
 
-kinds(_,X=>Y=>isa(X,Y)) --> [].
+kinds(x,X=>Y=>isa(X,Y)) --> [].
 kinds(s,X=>Y=>isa(X,Y)) --> a,kind.
-kinds(_,X=>Y=>isa(X,Y)) --> kinds.
+kinds(p,X=>Y=>isa(X,Y)) --> kinds.
 
+is(s) --> [is],a.
+is(p) --> [are].
 
 verb_phrase(s,M) --> [is],property(s,M).
 verb_phrase(p,M) --> [are],property(p,M).
@@ -170,12 +154,14 @@ question1(Q) --> [does],proper_noun(_,X),verb_phrase(_,X=>Q).
 %question1((Q1,Q2)) --> [are,some],noun(p,sk=>Q1),property(p,sk=>Q2).
 
 
-question1(Q) --> [is],a,noun(N,M1),kinds(N,M2=>M1=>Q),noun(s,M2).
-question1(Q) --> [what],kinds(N,M2=>M1=>Q),hypernym(N,M2,M1),[do,you,know].
-%question1(Q) --> [give,me,an,example,of],a,kinds(s,M2=>M1=>Q),hypernym(s,M2,M1).
-%question1(Q) --> [what,is],a,kinds(s,M2=>M1=>Q),hypernym(s,M2,M1). % switched M1&M2 for hypo
-
-
+question1(Q) --> is(N),noun(N,M1),kinds(_,M2=>M1=>Q),noun(_,M2).
+question1(Q) --> [what],kinds(_N1,M2=>M1=>Q),hypernym(_N2,M2,M1),[do,you,know].
+question1(Q) --> [what,do,you,know,about],kinds(_N1,M2=>M1=>Q),hyponym(_N2,M2,M1).
+question1(Q) --> [what,do,you,know,about],kinds(_N1,M2=>M1=>Q),hypernym(_N2,M2,M1).
+question1(Q) --> tell,kinds(s,M2=>M1=>Q),hypernym(s,M2,M1).
+question1(Q) --> [what],is(_N1),kinds(_N2,M1=>M2=>Q),hyponym(_N3,M1,M2).
+question1(Q) --> tell,[about],kinds(_N2,M1=>M2=>Q),hyponym(_N3,M1,M2).
+question1(Q) --> tell,[about],kinds(_N,M2=>M1=>Q),hypernym(_,M2,M1).
 
 
 
@@ -191,6 +177,10 @@ question1(Q) --> [what],kinds(N,M2=>M1=>Q),hypernym(N,M2,M1),[do,you,know].
 % - tell me what you know about cats ---- || - cats are a kind of animal - || - I don't know anything about cats ------------
 % - give me an example of an animal -- || - a cat is a kind of animal - || - I don't know any (kinds of animals) ---------
 % - give me some examples of animals - || - cats are the only kind of animal I know - || - I don't know any (kinds of animals) ---------
+
+%   'I want to'/'what do you' know about...
+%   will/can/wont you - tell me - what you know - about...
+%   tell me about...
 
 % - give me an example of each animal you know
 % - give me an example of every kind of animal you know
@@ -241,11 +231,26 @@ command(g(true,"Yes, you are a genius.")) --> [am,i,a,genius].
 
 % phrase shortenings %%%
 
+can --> [can].
+can --> [will].
+can --> [wont].
+
+tell --> [tell,me].
+tell --> [give,me].
+tell --> can,[you,tell,me].
+tell --> can,[you,give,me].
+
+about --> [something,about].
+about --> [anything,about].
+about --> [about].
+
 kind --> [].
+kind --> [example,of],a.
 kind --> [kind,of].
 kind --> [type,of].
 kinds --> [kinds,of].
 kinds --> [types,of].
+kinds --> [examples,of].
 
 example --> [example,of],a.
 
@@ -295,6 +300,33 @@ random_fact(X):-
 %%%%%%%% BELOW HERE IS DETRITIS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	%write_debug('hereiam'),
+	%write_debug(P),
+	%write_debug(X),
+	%write_debug(Lit).
+
+%hyper2gr(P,1,W,X=>Lit):-
+%	hyper(P,1,L),
+%	member(W,L),
+%	Lit=..[P,X].
+
+%
+
+
+%hypo2gr(P,1,W,X=>Lit):-
+%	hypo(P,1,L),
+%	member(W,L),
+%	Lit=..[P,X].
+
+%hypernym(s,noun(s,feline),noun(s,cat)) --> [cat].
+%hypernym(s,(X,feline(X)),(Y,cat(Y))) --> [cat].
+
+%hypernym(s,M)     --> [Noun],   {hyper2gr(_P,1,Noun,M)}.
+%hyponym(s,M)           --> [Noun],   {hypo2gr(_P,1,Noun,M)}.
+
+
+%noun(s,M,_)    --> [Noun],   {pred2gr(_P,1,n/Noun,M)}.
 
 %sentence1([(L:-true)]) --> a,noun(s,X),[is],a,kind,hypernym(s,X=>L).
 %sentence1([(L:-true)]) --> a,noun(s,X=>L),[is],a,example,hypernym(s,X).
