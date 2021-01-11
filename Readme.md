@@ -34,7 +34,7 @@ Once you've told Hyprolexa about a hyper-/hyponym, Hyprolexa remembers.
 🤖: a cat is feline
 ```
 
-knowledge_store.pl is a dynamic information store which keeps information from your conversations with Hyprolexa. Hyprolexa has the additional feature of allowing you to return to previous conversations. This means Hyprolexa will remember any previous facts you told it. Knowledge stores can be found in the History folder.
+knowledge_store.pl is a dynamic information store which keeps information from your conversations with Hyprolexa. Hyprolexa has the additional feature of allowing you to return to previous conversations. This means Hyprolexa will remember any previous facts you told it. Knowledge stores can be found in the folder Prolexa > History.
 
 ```
 🤖: Before we begin, would you like to jog my memory? Give me the name of an existing knowledge store...
