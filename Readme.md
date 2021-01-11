@@ -34,7 +34,7 @@ Once you've told Hyprolexa about a hyper-/hyponym, Hyprolexa remembers.
 🤖: a cat is feline
 ```
 
-knowledge_store.pl is a dynamic information store which keeps information from your conversations with Hyprolexa. Hyprolexa has the additional feature of allowing you to return to previous conversations. This means Hyprolexa will remember any previous facts you told it.
+knowledge_store.pl is a dynamic information store which keeps information from your conversations with Hyprolexa. Hyprolexa has the additional feature of allowing you to return to previous conversations. This means Hyprolexa will remember any previous facts you told it. Knowledge stores can be found in the History folder.
 
 ```
 🤖: Before we begin, would you like to jog my memory? Give me the name of an existing knowledge store...
@@ -73,7 +73,7 @@ sentence1([(L:-true)]) --> noun(p,M1),[are],kinds(_,M2=>M1=>L),hypernym(s,M2,M1)
 sentence1([(L:-true)]) --> noun(p,M1),[are],kinds(_,M2=>M1=>L),hypernym(p,M2,M1).
 ```
 
-prolexa_grammar.pl is also the file file which deals with queries.
+prolexa_grammar.pl is also the file which deals with queries.
 
 ```
 question1(Q) --> [is],a,noun(N,M1),kinds(N,M2=>M1=>Q),noun(s,M2).
