@@ -86,7 +86,7 @@ question1(Q) --> [what],kinds(N,M2=>M1=>Q),hypernym(N,M2,M1),[do,you,know].
 
 ## Hyprolexa's Architecture ##
 
-The Hyprolexa.py file holds the main loop passes text from the input to Prolexa and passes the output back.
+The Hyprolexa.py file holds the main loop which passes text from the input to Prolexa and passes the output back.
 
 Prior to passing this input to prolog, Flair is used for part-of-speech tagging to extract nouns from the sentence. These nouns are passed to functions held in wordnet_functions.py, which searches for hypo- and hypernyms of the nouns in the Wordnet database. This information is passed to the knowledge_store and stored in the format seen above.
 
@@ -109,15 +109,15 @@ Prior to passing this input to prolog, Flair is used for part-of-speech tagging 
  
 ### Issues ###
 
-- Currently hyprolexa has to be told about isa relationships before it can answer questions about them. It does, however, check that they are consistent with wordnet before storing the rule e.g. `a cat is a feline` makes the rule `rule([(isa(=>(_40780,feline(_40780)),=>(_40540,cat(_40540))):-true)])` but won't make a rule if you type `a cat is a monkey`. It would be much better if hyprolexa could add these rules automatically, but there was an issue with how hyprolexa stores nouns as `(_40540,cat(_40540))` instead of `cat` which caused errors in the `prolexa.pl` list of stored rules, and with making non-grammar rules in `prolexa_grammar.pl`.
+- Currently, Hyprolexa has to be told about isa relationships before it can answer questions about them. Hyprolexa does, however, check that new facts are consistent with Wordnet before storing the rule. For example, `a cat is a feline` makes the rule `rule([(isa(=>(_40780,feline(_40780)),=>(_40540,cat(_40540))):-true)])` but Hyprolexa won't make a rule if you type `a cat is a monkey`. It would be much better if Hyprolexa could add these rules automatically, but there was an issue with how hyprolexa stores nouns as `(_40540,cat(_40540))` instead of `cat` which caused errors in the `prolexa.pl` list of stored rules, and with making non-grammar rules in `prolexa_grammar.pl`.
  
 - Deal with underscores: currently underscores are removed because flair cannot tag words with underscores in as parts of speech. Unfortunately there are many underscore senses in wordnet. This means things like `toy dog` have to be typed as `toydog` and are returned by prolexa the same way.
  
 - Extend Hyprolexa to understand nested loops so it can relate indirect hypernyms/hyponyms e.g. `is a dog an animal -> a dog is a domesticated_animal, a domesticated_animal is an animal; therefore a dog is an animal`.
 
-- Use wordnet to tag word senses and import synsets into prolexa to get the correct sense of a word e.g. currently `a dog is a kind of canine` but `a canine is a kind of tooth`.
+- Use Wordnet to tag word senses and import synsets into prolexa to get the correct sense of a word e.g. currently `a dog is a kind of canine` but `a canine is a kind of tooth`.
 
-Questions we would like Hyprolexa to be able to answer include:
+Questions we would like Hyprolexa to be able to answer in future include:
 
 - `give me some animals you know`
 - `give me an example of each animal you know`
