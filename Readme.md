@@ -66,7 +66,7 @@ Hyponyms and hypernyms are stored in the format:
 ```
 hyper(animal, 1,[organism,being]).
 
-hypo(animal, 1,[acrodont,adult,biped,captive,chordate,creepy-crawly,critter,darter,domestic_animal,domesticated_animal,embryo,conceptus,fertilized_egg,feeder,female,fictional_animal,game,giant,herbivore,hexapod,homeotherm,homoiotherm,homotherm,insectivore,invertebrate,larva,male,marine_animal,marine_creature,sea_animal,sea_creature,mate,metazoan,migrator,molter,moulter,mutant,omnivore,peeper,pest,pet,pleurodont,poikilotherm,ectotherm,predator,predatory_animal,prey,quarry,racer,range_animal,scavenger,stayer,stunt,survivor,thoroughbred,purebred,pureblood,varmint,varment,work_animal,young,offspring,zooplankton]).
+hypo(animal, 1,[acrodont,adult,biped,captive,chordate,creepy-crawly,critter,darter,domesticanimal,domesticatedanimal,embryo,conceptus,fertilizedegg,feeder,female,fictionalanimal,game,giant,herbivore,hexapod,homeotherm,homoiotherm,homotherm,insectivore,invertebrate,larva,male,marine_animal,marinecreature,seaanimal,seacreature,mate,metazoan,migrator,molter,moulter,mutant,omnivore,peeper,pest,pet,pleurodont,poikilotherm,ectotherm,predator,predatory_animal,prey,quarry,racer,range_animal,scavenger,stayer,stunt,survivor,thoroughbred,purebred,pureblood,varmint,varment,workanimal,young,offspring,zooplankton]).
 ```
 
 Input sentences about hypernyms and hyponyms are parsed in prolexa_grammar.pl. 
@@ -105,6 +105,7 @@ Prior to passing this input to prolog, Flair is used for part-of-speech tagging 
    ```
    pip install -r requirements.txt
    ```
+ 
  
  
 ### Issues ###
