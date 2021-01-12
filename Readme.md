@@ -45,7 +45,6 @@ knowledge_store.pl is a dynamic information store which keeps information from y
 If knowledge_store_11161922 was saved for a conversation you had about snakes, Hyprolexa will remember the relevant hypo- and hypernyms. 
 
 ```
-🤖: 
 🧠: knowledge_store_11161922 
 🤖: Oh yes, I remember now!
 🧠: is a viper a snake?
