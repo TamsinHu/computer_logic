@@ -87,53 +87,13 @@ The Hyprolexa.py file holds the main loop passes text from the input to Prolexa 
 
 Prior to passing this input to prolog, Flair is used for part-of-speech tagging to extract nouns from the sentence. These nouns are passed to functions held in wordnet_functions.py, which searches for hypo- and hypernyms of the nouns in the Wordnet database. This information is passed to the knowledge_store and stored in the format seen above.
 
-#### Initial setup ####
+#### Setup and Installation ####
 
-1. Clone this repository
+1. Clone this repository, navigate into computer_logic directory. Install requirements.
     ```
     git clone https://github.com/TamsinHu/computer_logic.git
     cd computer_logic
+    pip install -r requirements.txt
     ```
-    
+ 
 
-
-## Installation ##
-
-<!--
-### `pip install` ###
-This installation approach is recommended.
-The installation script may take a moment when processing the Prolexa package
-since language models need to be downloaded (which is achieved by automatically
-executing the `prolexa/setup_models.py` script) -- the
-`Running setup.py install for prolexa ... /` step.
-
-To install execute
-```
-pip install -e .
-```
-while in the root directory of this repository.
-The `-e` flag installs an editable version of the package, which allows you to
-edit the source to instantly update the installed version of the package
-(read more
-[here](https://pip.pypa.io/en/stable/reference/pip_install/#install-editable)).
-
-This installation comes with two command line tools:
-
-* `prolexa-plus` -- **launches the Prolexa Plus CLI**, and
-* `prolexa-setup-models` -- downloads `nltk` and `flair` language corpora and
-  models.
-
-### Executing Source ###
-<!--1. Install Python dependencies
-   ```
-   pip install -r requirements.txt
-   ```
-2. Install language models and data
-   ```
-   python prolexa/setup_models.py
-   ```
-3. Run *Prolexa Plus*
-   ```
-   PYTHONPATH=./ python prolexa/prolexa_plus.py
-   ```
--->
