@@ -9,7 +9,7 @@ the command line or with speech input and output through the
 
  Hyprolexa extends the functionality of the question-answering assistant Prolexa, by giving it the ability to discuss hypernyms and hyponyms for nouns.
 
-Hyprolexa is built on Prolexa-Plus, which creates a bridge between Prolexa and Python: https://github.com/So-Cool/prolexa/tree/prolexa-plus. This bridge extends prolexa's linguistic knowledge with Wordnet from Python's Natural Language Toolkit (NLTK). 
+Hyprolexa is built on Prolexa-Plus, which creates a bridge between Prolexa and Python: https://github.com/So-Cool/prolexa/tree/prolexa-plus. This bridge extends Prolexa's linguistic knowledge with Wordnet from Python's Natural Language Toolkit (NLTK). 
 
 <!--part-of-speech tagging of nouns-->
 
@@ -34,7 +34,7 @@ Once you've told Hyprolexa about a hyper-/hyponym, Hyprolexa remembers.
 🤖: a cat is feline
 ```
 
-knowledge_store.pl is a dynamic information store which keeps information from your conversations with Hyprolexa. Hyprolexa has the additional feature of allowing you to return to previous conversations. This means Hyprolexa will remember any previous facts you told it. Knowledge stores can be found in the folder Prolexa > History.
+The file knowledge_store.pl is a dynamic information store, which keeps information from your conversations with Hyprolexa. Hyprolexa has the additional feature of allowing you to return to previous conversations. This means Hyprolexa will remember any previous facts you told it. Knowledge stores can be found in the folder Prolexa > History.
 
 ```
 🤖: Before we begin, would you like to jog my memory? Give me the name of an existing knowledge store...
@@ -42,7 +42,7 @@ knowledge_store.pl is a dynamic information store which keeps information from y
 🤖: Oh yes, I remember now!
 ```
 
-If knowledge_store_11161922 was saved for a conversation you had about snakes, Hyprolexa will remember the relevant hypo- and hypernyms. 
+If knowledge_store_11161922 was saved for a conversation you had about snakes, selecting this store will cause Hyprolexa to remember the relevant hyponyms and hypernyms. 
 
 ```
 🧠: knowledge_store_11161922 
@@ -70,17 +70,17 @@ Here are some other questions you could try asking Hyprolexa:
 To exit your conversation with Hyprolexa and return to terminal, type 'bye'.
 
 ### Turn Prolog Debugging On/Off
-`write_debug` predicates can be found in `prolexa.pl` and `prolexa_engine.pl`. To turn these on/off uncomment/comment these lines (but note that to avoid errors predicates must end with a `.` not a `,`).
+`write_debug` predicates can be found in `prolexa.pl` and `prolexa_engine.pl`. To turn these on/off, uncomment/comment these lines (but note that, to avoid errors, predicates must end with a `.` not a `,`).
 
 ## Hyprolexa's Grammar ##
 
-Hyprolexa's way of dealing with hyper- and hyponyms is based on Chapters 4 and 7 of *SimplyLogical*: https://book.simply-logical.space/ 
+Hyprolexa's method for dealing with hypernyms and hyponyms is based on Chapters 4 and 7 of *SimplyLogical*: https://book.simply-logical.space/ 
 
 Hyponyms and hypernyms are stored in the format:
 ```
 hyper(animal, 1,[organism,being]).
 
-hypo(animal, 1,[acrodont,adult,biped,captive,chordate,creepy-crawly,critter,darter,domesticanimal,domesticatedanimal,embryo,conceptus,fertilizedegg,feeder,female,fictionalanimal,game,giant,herbivore,hexapod,homeotherm,homoiotherm,homotherm,insectivore,invertebrate,larva,male,marine_animal,marinecreature,seaanimal,seacreature,mate,metazoan,migrator,molter,moulter,mutant,omnivore,peeper,pest,pet,pleurodont,poikilotherm,ectotherm,predator,predatory_animal,prey,quarry,racer,range_animal,scavenger,stayer,stunt,survivor,thoroughbred,purebred,pureblood,varmint,varment,workanimal,young,offspring,zooplankton]).
+hypo(animal, 1,[acrodont,adult,biped,captive,chordate,creepy-crawly,critter,darter,domesticanimal,domesticatedanimal,embryo,conceptus,fertilizedegg,feeder,female,fictionalanimal,game,giant,herbivore,hexapod,homeotherm,homoiotherm,homotherm,insectivore,invertebrate,larva,male,marineanimal,marinecreature,seaanimal,seacreature,mate,metazoan,migrator,molter,moulter,mutant,omnivore,peeper,pest,pet,pleurodont,poikilotherm,ectotherm,predator,predatory_animal,prey,quarry,racer,rangeanimal,scavenger,stayer,stunt,survivor,thoroughbred,purebred,pureblood,varmint,varment,workanimal,young,offspring,zooplankton]).
 ```
 
 Input sentences about hypernyms and hyponyms are parsed in prolexa_grammar.pl. 
@@ -91,7 +91,7 @@ sentence1([(L:-true)]) --> noun(p,M1),[are],kinds(_,M2=>M1=>L),hypernym(s,M2,M1)
 sentence1([(L:-true)]) --> noun(p,M1),[are],kinds(_,M2=>M1=>L),hypernym(p,M2,M1).
 ```
 
-prolexa_grammar.pl is also the file which deals with queries.
+prolexa_grammar.pl is also the file which deals with queries:
 
 ```
 question1(Q) --> [is],a,noun(N,M1),kinds(N,M2=>M1=>Q),noun(s,M2).
@@ -102,7 +102,7 @@ question1(Q) --> [what],kinds(N,M2=>M1=>Q),hypernym(N,M2,M1),[do,you,know].
 
 The Hyprolexa.py file holds the main loop which passes text from the input to Prolexa and passes the output back.
 
-Prior to passing this input to prolog, Flair is used for part-of-speech tagging to extract nouns from the sentence. These nouns are passed to functions held in wordnet_functions.py, which searches for hypo- and hypernyms of the nouns in the Wordnet database. This information is passed to the knowledge_store and stored in the format seen above.
+Prior to passing this input to prolog, Flair is used for part-of-speech tagging to extract nouns from the sentence. These nouns are passed to functions held in wordnet_functions.py, which searches for hyponyms and hypernyms of the nouns in the Wordnet database. This information is passed to the knowledge_store.pl file and stored in the format seen above.
 
 #### Setup and Installation ####
 
@@ -124,11 +124,13 @@ Prior to passing this input to prolog, Flair is used for part-of-speech tagging 
  
 ### Issues ###
 
-- Currently, Hyprolexa has to be told about isa relationships before it can answer questions about them. Hyprolexa does, however, check that new facts are consistent with Wordnet before storing the rule. For example, `a cat is a feline` makes the rule `rule([(isa(=>(_40780,feline(_40780)),=>(_40540,cat(_40540))):-true)])` but Hyprolexa won't make a rule if you type `a cat is a monkey`. It would be much better if Hyprolexa could add these rules automatically, but there was an issue with how hyprolexa stores nouns as `(_40540,cat(_40540))` instead of `cat` which caused errors in the `prolexa.pl` list of stored rules, and with making non-grammar rules in `prolexa_grammar.pl`.
+The following are suggestions for future improvements for Hyprolexa.
+
+- Create automatic rule instantiation: currently, Hyprolexa has to be told about 'isa' relationships before it can answer questions about them. Hyprolexa does, however, check that new facts are consistent with Wordnet before storing the rule. For example, `a cat is a feline` makes the rule `rule([(isa(=>(_40780,feline(_40780)),=>(_40540,cat(_40540))):-true)])` but Hyprolexa won't make a rule if you type `a cat is a monkey`. Ideally, Hyprolexa would add these rules automatically, but there was an issue with how hyprolexa stores nouns as `(_40540,cat(_40540))` instead of `cat`, which caused errors in the `prolexa.pl` list of stored rules. There was another issue with making non-grammar rules in `prolexa_grammar.pl`.
  
-- Deal with underscores: currently underscores are removed because flair cannot tag words with underscores in as parts of speech. Unfortunately there are many underscore senses in wordnet. This means things like `toy dog` have to be typed as `toydog` and are returned by prolexa the same way.
+- Deal with underscores: currently, underscores are removed because flair cannot tag words with underscores in as parts of speech. Unfortunately there are many underscore senses in wordnet. This means things like `toy dog` have to be typed as `toydog` and are returned by prolexa the same way.
  
-- Extend Hyprolexa to understand nested loops so it can relate indirect hypernyms/hyponyms e.g. `is a dog an animal -> a dog is a domesticated_animal, a domesticated_animal is an animal; therefore a dog is an animal`.
+- Extend Hyprolexa to understand nested loops, so it can relate indirect hypernyms/hyponyms e.g. `is a dog an animal -> a dog is a domesticatedanimal, a domesticatedanimal is an animal; therefore a dog is an animal`.
 
 - Use Wordnet to tag word senses and import synsets into prolexa to get the correct sense of a word e.g. currently `a dog is a kind of canine` but `a canine is a kind of tooth`.
 
