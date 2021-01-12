@@ -94,13 +94,13 @@ Prior to passing this input to prolog, Flair is used for part-of-speech tagging 
     git clone https://github.com/TamsinHu/computer_logic.git
     ```
 2. Navigate into computer_logic directory. 
-  ```
+    ```
     cd computer_logic
- ```   
+    ```   
  
 3. Install requirements into your venv. 
-```
+   ```
    pip install -r requirements.txt
- ```
+   ```
  
 
