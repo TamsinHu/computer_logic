@@ -47,10 +47,24 @@ If knowledge_store_11161922 was saved for a conversation you had about snakes, H
 ```
 🧠: knowledge_store_11161922 
 🤖: Oh yes, I remember now!
-🧠: is a viper a snake?
-*** utterance(is a viper a snake)
-*** query(isa(=>(_48460,snake(_48460)),=>(_48396,viper(_48396))))
-🤖: a viper is snake
+🧠: what kinds of snake do you know?
+🤖: a viper is a snake
+```
+
+Here are some ways you can teach Hyprolexa facts:
+```
+🧠: Birch is a tree
+🧠: A uke is a type of guitar
+
+```
+
+Here are some other questions you could try asking Hyprolexa:
+
+```
+🧠: What do you know about guitars?
+🧠: Tell me something about guitars.
+🧠: can you tell me about guitars?
+
 ```
 
 To exit your conversation with Hyprolexa and return to terminal, type 'bye'.
