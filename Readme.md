@@ -103,4 +103,25 @@ Prior to passing this input to prolog, Flair is used for part-of-speech tagging 
    pip install -r requirements.txt
    ```
  
+ 
+### Issues ###
 
+- Currently hyprolexa has to be told about isa relationships before it can answer questions about them. It does, however, check that they are consistent with wordnet before storing the rule e.g. 'a cat is a feline' makes the rule '''rule([(isa(=>(_40780,feline(_40780)),=>(_40540,cat(_40540))):-true)])''' but won't make a rule if you type 'a cat is a monkey'. It would be much better if hyprolexa could add these rules automatically, but there was an issue with how hyprolexa stores nouns as (_40540,cat(_40540)) instead of (cat) which caused errors in the prolexa.pl list of stored rules, and with making non-grammar rules in prolexa_grammar.pl.
+ 
+- Deal with underscores: currently underscores are removed because flair cannot tag words with underscores in as parts of speech. Unfortunately there are many underscore senses in wordnet. This means things like 'toy dog' have to be typed as 'toydog' and are returned by prolexa the same way.
+ 
+- Extend Hyprolexa to understand nested loops so it can relate indirect hypernyms/hyponyms e.g. is a dog an animal -> a dog is a domesticated_animal, a domesticated_animal is an animal; therefore a dog is an animal.
+
+- Use wordnet to tag word senses and import synsets into prolexa to get the correct sense of a word e.g. currently 'a dog is a kind of canine' but 'a canine is a kind of tooth'.
+
+Questions we would like Hyprolexa to be able to answer include:
+
+- give me some animals you know
+- give me an example of each animal you know
+- give me an example of every kind of animal you know
+- give me a different kind of dog
+- tell me everything you know about cats
+- tell me all the animals you know
+- list all the animals you know
+- what kind of animal is a poodle - a poodle is a kind of dog
+- do you know what kind of animal a poodle is
