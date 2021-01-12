@@ -1,4 +1,0 @@
-Arthur can fly. 
-Bill can fly. 
-Colin can fly. 
-Dave can fly.

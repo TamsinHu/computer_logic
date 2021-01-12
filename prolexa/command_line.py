@@ -1,5 +1,5 @@
 import prolexa.setup_models as setup_models_
-import prolexa.prolexa_plus as prolexa_plus_
+import prolexa.hyprolexa as prolexa_plus_
 
 def setup_models():
     setup_models_.get_wordnet_nltk()

@@ -17,4 +17,7 @@ venv/**
 .vscode/**
 .venv/**
 
+#History
+history/knowledge_store*.pl
+
 
