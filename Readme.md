@@ -91,9 +91,9 @@ Prior to passing this input to prolog, Flair is used for part-of-speech tagging 
 
 1. Clone this repository
     ```
-    git clone ---.git
-    cd prolexa
+    git clone https://github.com/TamsinHu/computer_logic.git
     ```
+    
 
 
 ## Installation ##
