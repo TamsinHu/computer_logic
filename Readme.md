@@ -53,6 +53,8 @@ If knowledge_store_11161922 was saved for a conversation you had about snakes, H
 🤖: a viper is snake
 ```
 
+To exit your conversation with Hyprolexa and return to terminal, type 'bye'.
+
 ## Hyprolexa's Grammar ##
 
 Hyprolexa's way of dealing with hyper- and hyponyms is based on Chapters 4 and 7 of *SimplyLogical*: https://book.simply-logical.space/ 
