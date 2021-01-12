@@ -89,11 +89,18 @@ Prior to passing this input to prolog, Flair is used for part-of-speech tagging 
 
 #### Setup and Installation ####
 
-1. Clone this repository, navigate into computer_logic directory. Install requirements.
+1. Clone this repository. 
     ```
     git clone https://github.com/TamsinHu/computer_logic.git
-    cd computer_logic
-    pip install -r requirements.txt
     ```
+2. Navigate into computer_logic directory. 
+  ```
+    cd computer_logic
+ ```   
+ 
+3. Install requirements into your venv. 
+```
+   pip install -r requirements.txt
+ ```
  
 
