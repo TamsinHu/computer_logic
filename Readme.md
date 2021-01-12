@@ -9,7 +9,7 @@ the command line or with speech input and output through the
 
  Hyprolexa extends the functionality of the question-answering assistant Prolexa, by giving it the ability to discuss hypernyms and hyponyms for nouns.
 
-Hyprolexa is built on Prolexa-Plus, which creates a bridge between Prolexa and Python. This bridge extends prolexa's linguistic knowledge with Wordnet from Python's Natural Language Toolkit (NLTK). 
+Hyprolexa is built on Prolexa-Plus, which creates a bridge between Prolexa and Python: https://github.com/So-Cool/prolexa/tree/prolexa-plus. This bridge extends prolexa's linguistic knowledge with Wordnet from Python's Natural Language Toolkit (NLTK). 
 
 <!--part-of-speech tagging of nouns-->
 
