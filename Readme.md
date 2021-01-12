@@ -55,6 +55,9 @@ If knowledge_store_11161922 was saved for a conversation you had about snakes, H
 
 To exit your conversation with Hyprolexa and return to terminal, type 'bye'.
 
+### Turn Prolog Debugging On/Off
+`write_debug` predicates can be found in `prolexa.pl` and `prolexa_engine.pl`. To turn these on/off uncomment/comment these lines (but note that to avoid errors predicates must end with a `.` not a `,`).
+
 ## Hyprolexa's Grammar ##
 
 Hyprolexa's way of dealing with hyper- and hyponyms is based on Chapters 4 and 7 of *SimplyLogical*: https://book.simply-logical.space/ 
